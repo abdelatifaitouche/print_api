@@ -8,7 +8,9 @@ import sys
 import os
 from app.config.database import BASE    
 from app.models.base import Base
+
 from app.models.order import OrderModel
+from app.models.order_item import OrderItem
 from app.config.database import DATABASE_URL
 
 # this is the Alembic Config object, which provides

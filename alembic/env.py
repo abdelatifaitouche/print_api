@@ -11,8 +11,9 @@ from app.models.base import Base
 
 from app.models.order import OrderModel
 from app.models.order_item import OrderItem
+from app.models.company import CompanyModel
 from app.config.database import DATABASE_URL
-
+from app.models.user import User
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config

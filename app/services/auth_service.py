@@ -64,7 +64,7 @@ class AuthService :
 
 
         access_token : str = self.__jwt_manager.generate_token(user_data = {"username":user.username , "email" : user.email , "role":"admin"})
-        refresh_token : str = self.__jwt_manager.generate_token(user_data = {"username":user.username , "email" : user.email , "role":"admin"} , is_refresh = True)
+        
         return access_token
 
 

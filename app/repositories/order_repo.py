@@ -7,9 +7,7 @@ class OrderRepository:
 
     def create(self , order:OrderModel, db : Session) -> OrderModel:
         db.add(order)
-
-        db.commit()
-        db.refresh(order)
+        db.flush()
         return order
 
     def get_by_id(self , order_id : str , db : Session) -> OrderModel : 

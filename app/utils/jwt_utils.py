@@ -29,7 +29,17 @@ class JwtManager :
         encoded = encoded_data.decode("ascii").rstrip("=")
         
         return encoded
-
+    
+    def __base_64_decoding(self , data : str) -> dict:
+        """
+            takes a bytes string from the token,
+            addes the correct padding since base64 expects the data to be
+            a multiple of 4 otherwise it adds a padding (=)
+        """
+        padding = (4 - len(data) % 4) % 4
+        data += "=" * padding
+        decoded = json.loads(base64.urlsafe_b64decode(data).decode("utf-8"))
+        return decoded
     def __generate_signature(self , encoded_header : str , encoded_payload : str) -> str :
         """
             takes the encoded header and payload strings(ascii chars) , 
@@ -60,9 +70,9 @@ class JwtManager :
             "alg" : "sha256" , "typ" :"JWT" 
         }
         if is_refresh :  
-            payload : dict = self.__payload_factory.access_token_payload(user_data["username"] , user_data["email"] , user_data["role"])
-        else :             
             payload : dict = self.__payload_factory.refresh_token_payload(user_data["username"] , user_data["email"] , user_data["role"])
+        else :             
+            payload : dict = self.__payload_factory.access_token_payload(user_data["username"] , user_data["email"] , user_data["role"])
 
         encoded_header = self.__base_64_encoding(header)
         encoded_payload = self.__base_64_encoding(payload)
@@ -72,4 +82,26 @@ class JwtManager :
 
         return token
 
+    def verify_token(self , token : str):
+        """
+            recalculate the signature with our private key
+             - header.payload.signature
+                deconstruct each part
+                    use the generate signature and compare it to the sent signature
+        """    
+        header,payload,signature = token.split(".")
 
+        recalculated_signature = self.__generate_signature(header , payload)
+
+        if signature != recalculated_signature : 
+            return False
+        
+        decoded_payload = self.__base_64_decoding(payload)
+
+        current_time = int(datetime.utcnow().timestamp())
+
+        if decoded_payload["exp"] < current_time : 
+            print("expired token")
+            return False
+
+        return True

@@ -5,9 +5,11 @@ from fastapi import Depends
 from app.services.order_service import OrderService
 from sqlalchemy.orm import Session
 from typing import List
+from app.utils.private_route import PrivateRoute
 
-
-order_endpoint = APIRouter()
+order_endpoint = APIRouter(
+    dependencies = [Depends(PrivateRoute()),]
+)
 order_service = OrderService()
 
 

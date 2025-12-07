@@ -3,8 +3,8 @@ from app.schemas.user_schema import UserCreate , User , UserLogin
 from app.services.auth_service import AuthService
 from app.config.database import get_db
 from sqlalchemy.orm import Session
-from fastapi.security import HTTPBearer , HTTPAuthorizationCredentials
-
+from fastapi.security import HTTPAuthorizationCredentials
+from app.utils.private_route import PrivateRoute
 
 auth_endpoints = APIRouter()
 
@@ -31,11 +31,8 @@ def login_user(login_data : UserLogin , db : Session = Depends(get_db)):
     return access_token
 
 
-bearer_scheme = HTTPBearer()
+
 
 @auth_endpoints.get("/protected")
-def protected_route(credentials : HTTPAuthorizationCredentials = Depends(bearer_scheme)):
-    token = credentials.credentials
-
-    print(f"getting the token from the protectected route {token}")
-    return token
+def protected_route(credentials : HTTPAuthorizationCredentials = Depends(PrivateRoute())):
+    return "testing"

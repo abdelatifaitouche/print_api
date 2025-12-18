@@ -3,9 +3,10 @@ from app.utils.google_drive_manager import GoogleDriveManager
 from app.repositories.company_repo import CompanyRepository
 from app.config.database import SessionLocal
 from sqlalchemy.orm import Session
+import os
 
 
-celery_app = Celery(main="drive" , broker="pyamqp://guest:guest@localhost:5672//")
+celery_app = Celery(main="drive" , broker=os.getenv("CELERY_BROKER_URL"))
 
 
 @celery_app.task

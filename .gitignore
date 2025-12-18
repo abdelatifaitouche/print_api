@@ -1,10 +1,53 @@
-# Python-generated files
+# Python cache and bytecode
 __pycache__/
-*.py[oc]
-build/
-dist/
-wheels/
-*.egg-info
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
 
-# Virtual environments
-.venv
+# Python environment
+venv/
+.env
+
+# Testing
+*.pytest_cache/
+*.coverage
+.coverage.*
+.cache
+.pytest_cache/
+
+# Logs
+*.log
+*.pid
+
+# IDEs
+.vscode/
+.idea/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Docker
+*.log
+docker-compose.override.yml
+docker-compose.override.yaml
+
+# Docker volumes and temp data
+postgres_data/
+redis_data/
+
+# Poetry / pipenv
+poetry.lock
+Pipfile.lock
+
+# Alembic migrations (push these, but ignore DB file)
+# alembic/versions/  <-- Comment this if you want to track migrations
+*.db
+test_db.db
+
+# Google Service Account (keep secret!)
+drive_api.json
+
+# macOS
+.DS_Store
+

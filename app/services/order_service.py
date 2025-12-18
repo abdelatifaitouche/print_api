@@ -5,7 +5,7 @@ from app.repositories.order_repo import OrderRepository
 from sqlalchemy.orm import Session
 from typing import List
 from fastapi.exceptions import HTTPException
-from fastapi import status
+from fastapi import status , UploadFile
 from app.services.order_item_service import OrderItemService
 from app.schemas.order_item_schema import OrderItemCreate
 
@@ -23,24 +23,36 @@ class OrderService(ServiceInterface) :
         return order_list
 
 
-    def create(self , db : Session , order_data : OrderCreate)->OrderRead:
+    def create(self , db : Session , order_data : OrderCreate , files : List[UploadFile])->OrderRead:
+        """
+            Creates an order and its item in cascade, 
+            the whole creation is done in one single transaction to avoid
+            any data integrity issues
+
+        """    
+
+
         try :  
             order = OrderModel(order_name = order_data.order_name ,order_price = order_data.order_price )
-
             order_created = self.__order_repo.create(order , db)
-            print("am i even here") 
-            if order_created : 
-                i = 0
-                print(order_created.id)
-                for item in order_data.items : 
-                    print(f"creating the item {i}")
+            if order_created :
+
+                for item , f in zip(order_data.items , files) :
+                    if not item.item_name : 
+                        raise Exception("item name must be added")
+
+                    if not item.quantity or item.quantity <= 0 :
+                        raise Exception("Invalid quantity input")
+
+                    #file will be uploaded in the background
                     order_item : OrderItemCreate = OrderItemCreate(
                                 order_id = order_created.id,
                                 item_name = item.item_name,
                                 quantity = item.quantity
                                  )
-                    self.__order_item_service.create(order_item , db)
-                    i+=1
+                    item_model  = self.__order_item_service.create(order_item , db)
+
+                    #files are uploaded here in the queue pass the file + the item.id()
             else : 
                 raise Exception("an error has occured while creating the order")
 

@@ -1,6 +1,7 @@
 
 from pydantic import BaseModel
 from uuid import UUID
+from app.enums.order_items_status import OrderItemStatus
 
 
 class OrderItemBase(BaseModel):
@@ -23,5 +24,6 @@ class OrderItemRead(BaseModel):
     id : UUID
     order_id :str
     item_name : str
+    status : OrderItemStatus = OrderItemStatus.PENDING
     quantity : int
     model_config = {"from_attributes":True}

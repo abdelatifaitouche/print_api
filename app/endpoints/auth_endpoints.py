@@ -1,4 +1,5 @@
-from fastapi import APIRouter , Depends , Header
+from fastapi import APIRouter , Depends ,Response
+
 from app.schemas.user_schema import UserCreate , User , UserLogin
 from app.services.auth_service import AuthService
 from app.config.database import get_db
@@ -26,12 +27,29 @@ def register_user(user_data : UserCreate , db:Session = Depends(get_db)):
 
 
 @auth_endpoints.post("/login")
-def login_user(login_data : UserLogin , db : Session = Depends(get_db)):
+def login_user(login_data : UserLogin ,response:Response, db : Session = Depends(get_db)):
     access_token = auth_service.login_user(login_data , db) 
-    return access_token
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        secure=False,
+        samesite="lax",
+        max_age=36000
+    )
+    return 'logged in'
 
 
-
+@auth_endpoints.post('/logout')
+def logout_user(response:Response):
+    response.set_cookie(
+        key="access_token",
+        value="",
+        httponly=True,
+        secure=False,
+        samesite="lax"
+    )
+    return "loggedout"
 
 @auth_endpoints.get("/protected")
 def protected_route(credentials : HTTPAuthorizationCredentials = Depends(PrivateRoute())):

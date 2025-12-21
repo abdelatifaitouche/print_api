@@ -3,10 +3,10 @@ from pydantic import BaseModel
 from app.enums.company_enums import FolderStatus
 from typing import Optional
 from datetime import datetime
-
+from uuid import UUID
 
 class CompanyRead(BaseModel):
-    id : str
+    id : UUID
     name : str
     address : str
     email : str
@@ -14,6 +14,7 @@ class CompanyRead(BaseModel):
     folder_status : FolderStatus | None = FolderStatus.PENDING
     drive_folder_id : str | None = None
     created_at : datetime 
+    created_by : UUID
     model_config = {'from_attributes' : True}
 
 class CompanyCreate(BaseModel):
@@ -21,7 +22,8 @@ class CompanyCreate(BaseModel):
     address : str
     email : str
     phone : str
-    
+    created_by : str|None = None
+
     model_config = {'from_attributes' : True}
 
 

@@ -15,15 +15,15 @@ class OrderService(ServiceInterface) :
         self.__order_repo = OrderRepository()
         self.__order_item_service = OrderItemService()
 
-    def list(self , db : Session) -> List[OrderRead]:
-        orders : List[OrderModel] = self.__order_repo.list(db)
+    def list(self , db : Session , user_id : str | None = None ) -> List[OrderRead]:
+        orders : List[OrderModel] = self.__order_repo.list(db , user_id)
         
         order_list : List[OrderRead] = [OrderRead.from_orm(order) for order in orders]
 
         return order_list
+    
 
-
-    def create(self , db : Session , order_data : OrderCreate , files : List[UploadFile])->OrderRead:
+    def create(self , db : Session , order_data : OrderCreate , user : dict )->OrderRead:
         """
             Creates an order and its item in cascade, 
             the whole creation is done in one single transaction to avoid
@@ -33,11 +33,11 @@ class OrderService(ServiceInterface) :
 
 
         try :  
-            order = OrderModel(order_name = order_data.order_name ,order_price = order_data.order_price )
+            order = OrderModel(order_name = order_data.order_name ,order_price = order_data.order_price , created_by = user["id"] )
             order_created = self.__order_repo.create(order , db)
             if order_created :
 
-                for item , f in zip(order_data.items , files) :
+                for item  in order_data.items :
                     if not item.item_name : 
                         raise Exception("item name must be added")
 

@@ -52,5 +52,5 @@ def logout_user(response:Response):
     return "loggedout"
 
 @auth_endpoints.get("/protected")
-def protected_route(credentials : HTTPAuthorizationCredentials = Depends(PrivateRoute())):
+def protected_route(credentials : HTTPAuthorizationCredentials = Depends(PrivateRoute(roles=["admin" , "user"]))):
     return "testing"

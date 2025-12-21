@@ -72,7 +72,7 @@ class JwtManager :
         if is_refresh :  
             payload : dict = self.__payload_factory.refresh_token_payload(user_data["username"] , user_data["email"] , user_data["role"])
         else :             
-            payload : dict = self.__payload_factory.access_token_payload(user_data["username"] , user_data["email"] , user_data["role"])
+            payload : dict = self.__payload_factory.access_token_payload(user_data["id"] , user_data["username"] , user_data["email"] , user_data["role"])
 
         encoded_header = self.__base_64_encoding(header)
         encoded_payload = self.__base_64_encoding(payload)
@@ -105,3 +105,12 @@ class JwtManager :
             return False
 
         return True
+
+
+    def get_user_from_token(self , token : str) -> dict:
+        
+        header,payload,signature = token.split(".")
+
+        decoded_payload = self.__base_64_decoding(payload)
+
+        return decoded_payload

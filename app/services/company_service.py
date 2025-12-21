@@ -15,7 +15,7 @@ class CompanyService(ServiceInterface):
         """
         self.__repo = CompanyRepository()
 
-    def create(self , company_data : CompanyCreate , db : Session)->CompanyCreate:
+    def create(self , company_data : CompanyCreate , db : Session , user_id : str|None = None)->CompanyCreate:
         """
             FIRST CREATE THE FOLDER DRIVER
         """
@@ -25,10 +25,10 @@ class CompanyService(ServiceInterface):
 
         if not company_data.email : 
             #include some way to verify the email validity
-            raise Exception("please enter a valid email")
-        
-        model : CompanyModel = CompanyModel(**company_data.dict())
+            raise Exception("please enter a valid email") 
 
+        company_data.created_by = user_id
+        model : CompanyModel = CompanyModel(**company_data.dict())
         created_model : CompanyModel = self.__repo.create(model , db)
         
         if not created_model : 
@@ -39,18 +39,18 @@ class CompanyService(ServiceInterface):
 
         return company_data
 
-    def list(self , db:Session)->List[CompanyRead]:
+
+    def list(self , db:Session , user_id : str | None = None)->List[CompanyRead]:
         
-        companies_model : List[CompanyModel] = self.__repo.list(db)
+        companies_model : List[CompanyModel] = self.__repo.list(db , user_id)
 
         if not companies_model :
 
             raise Exception("error getting the companies")
         
         return [CompanyRead.from_orm(company) for company in companies_model]
-        
-        
-
+    
+    
 
     def get_by_id(self , company_id : str , db:Session)->CompanyRead:
 

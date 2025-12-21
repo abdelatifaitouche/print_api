@@ -31,7 +31,7 @@ class AuthService :
         
         hashed_password = encrypt_password(user_data.password)
 
-        user_model = UserDB(username = user_data.username , email = user_data.email , password = hashed_password)
+        user_model = UserDB(username = user_data.username , email = user_data.email , password = hashed_password , role = user_data.role)
 
         user = self.__auth_repo.create(user_model , db)
         
@@ -63,7 +63,7 @@ class AuthService :
         
 
 
-        access_token : str = self.__jwt_manager.generate_token(user_data = {"username":user.username , "email" : user.email , "role":"admin"})
+        access_token : str = self.__jwt_manager.generate_token(user_data = {"id" : user.id , "username":user.username , "email" : user.email , "role":user.role})
         
         return access_token
 
@@ -75,7 +75,8 @@ class AuthService :
     def get_user_by_id(self):
         return
 
-
+    def get_user(self):
+        return
     def update_user(self):
         return
 

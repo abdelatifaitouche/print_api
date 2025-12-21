@@ -13,6 +13,7 @@ class OrderRead(BaseModel):
     status : OrderStatus = OrderStatus.PENDING
     created_at : datetime
     updated_at : datetime
+    created_by : UUID
     items : List[OrderItemRead]
     model_config = {
             "from_attributes" : True

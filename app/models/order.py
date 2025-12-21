@@ -1,5 +1,5 @@
 from .base import Base
-from sqlalchemy import String , Integer
+from sqlalchemy import String , Integer , ForeignKey
 from sqlalchemy.orm import Mapped , mapped_column , relationship
 from app.enums.order_enums import OrderStatus
 
@@ -13,6 +13,8 @@ class OrderModel(Base):
     order_price:Mapped[int] = mapped_column(Integer , nullable=False)
     
     #add client_id , delivery_date , 
+    
+    created_by : Mapped[str] = mapped_column(String , ForeignKey("users.id") , nullable=True)
 
     items : Mapped[list["OrderItem"]] = relationship(
                 back_populates = "order" , cascade="all , delete-orphan"

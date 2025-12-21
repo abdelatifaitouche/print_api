@@ -1,6 +1,6 @@
 from .base import Base
-from sqlalchemy.orm import Mapped , mapped_column
-from sqlalchemy import String
+from sqlalchemy.orm import Mapped , mapped_column , relationship
+from sqlalchemy import String , ForeignKey
 from app.enums.company_enums import FolderStatus
 
 
@@ -15,5 +15,8 @@ class CompanyModel(Base):
     phone : Mapped[str] = mapped_column(String , nullable=True)
     drive_folder_id : Mapped[str] = mapped_column(String , nullable=True)    
     folder_status : Mapped[str] = mapped_column(String , server_default=FolderStatus.PENDING.value , nullable=False)
+    
+    created_by : Mapped[str] = mapped_column(String , ForeignKey("users.id") , nullable=True)
+
     def __repr__(self):
         return f"<Company : {self.name}>"

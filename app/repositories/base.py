@@ -19,7 +19,13 @@ class BaseRepository(Generic[T]):
             db.rollback()
             raise e
 
-    def list(self ,db :Session) -> List[T]:
+    def list(self ,db :Session , user_id : str | None = None) -> List[T]:
+        
+        if user_id : 
+            stmt = select(self.MODEL).where(self.MODEL.created_by == user_id)
+            result = db.execute(stmt).scalars().all()
+            return result
+
         stmt = select(self.MODEL)
         result = db.execute(stmt).scalars().all()
 

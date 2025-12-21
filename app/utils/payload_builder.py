@@ -8,8 +8,9 @@ class JwtPayloadFactory :
     __refresh_exp = 5000000
 
     @staticmethod
-    def access_token_payload(name : str ,email : str ,  role : str)->dict:
+    def access_token_payload(id :str , name : str ,email : str ,  role : str)->dict:
         return {
+            "id" :  id , 
             "name" : name , 
             "email" : email,
             "role" : role , 

@@ -5,30 +5,29 @@ from app.services.company_service import CompanyService
 from sqlalchemy.orm import Session
 from typing import List
 from app.utils.private_route import PrivateRoute
-company_endpoints = APIRouter(
-        
+company_endpoints = APIRouter(        
         )
 
 
 company_service = CompanyService()
 
 @company_endpoints.get("/{company_id}" , response_model=CompanyRead)
-def get_company(company_id : str , db : Session = Depends(get_db)):
+def get_company(company_id : str , db : Session = Depends(get_db) , user : dict = Depends(PrivateRoute(roles=["admin" , "user"]))):
     company : CompanyRead = company_service.get_by_id(company_id , db)
     return company
 
 
-@company_endpoints.post('/' , response_model=CompanyCreate)
-def create_company(company_data : CompanyCreate , db:Session=Depends(get_db)):
-    
-    company : CompanyCreate = company_service.create(company_data , db)
+@company_endpoints.post('/' , response_model=CompanyRead)
+def create_company(company_data : CompanyCreate , db:Session=Depends(get_db), user : dict=Depends(PrivateRoute(roles=["admin" , "user"]))): 
+    print("user" , user)
+    company : CompanyCreate = company_service.create(company_data , db , user["id"])
 
     return company
 
 @company_endpoints.get('/' , response_model=List[CompanyRead])
-def list_companies(db : Session = Depends(get_db))->List[CompanyRead]:
+def list_companies(db : Session = Depends(get_db) , user : dict = Depends(PrivateRoute(roles=["admin" , "user"])))->List[CompanyRead]:
     
-    companies : List[CompanyRead] = company_service.list(db)
+    companies : List[CompanyRead] = company_service.list(db , user["id"])
 
     return companies
 

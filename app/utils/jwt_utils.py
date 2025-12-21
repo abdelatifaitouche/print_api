@@ -4,11 +4,13 @@ import base64
 import hmac
 from datetime import datetime,timedelta
 from .payload_builder import JwtPayloadFactory
-
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
 class JwtManager : 
     def __init__(self):
-        self.__secret_key = "MYSECRETKEY" #needs to be loaded from env
+        self.__secret_key = os.getenv("SECRET_KEY") #needs to be loaded from env
         self.algo = "sha256"
         self.__access_exp = 36000 #needs to be loaded from env
         self.__refresh_exp = 5000000 #needs to be loaded from env

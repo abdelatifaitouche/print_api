@@ -6,7 +6,7 @@ from app.config.database import get_db
 from sqlalchemy.orm import Session
 from fastapi.security import HTTPAuthorizationCredentials
 from app.utils.private_route import PrivateRoute
-
+from app.enums.roles import Roles
 auth_endpoints = APIRouter()
 
 auth_service = AuthService()
@@ -20,7 +20,7 @@ def index():
 
 
 @auth_endpoints.post("/register_user/" , response_model = User)
-def register_user(user_data : UserCreate , db:Session = Depends(get_db)):
+def register_user(user_data : UserCreate , db:Session = Depends(get_db) , user:dict = Depends(PrivateRoute(roles=[Roles.ADMIN]))):
     user = auth_service.create_user(user_data , db)
     return user
 
@@ -35,7 +35,8 @@ def login_user(login_data : UserLogin ,response:Response, db : Session = Depends
         httponly=True,
         secure=False,
         samesite="lax",
-        max_age=36000
+        max_age=36000,
+        path="/"
     )
     return 'logged in'
 
@@ -50,6 +51,18 @@ def logout_user(response:Response):
         samesite="lax"
     )
     return "loggedout"
+
+
+#get user profile (user_data)
+#get all users (only for the admin)
+
+@auth_endpoints.get("/me" , response_model=User)
+def get_user_profile(user : dict = Depends(PrivateRoute(roles=[Roles.ADMIN , Roles.USER]))):
+    print(user) 
+    user_profile : User = User(username = user["name"] , email=user["email"] , role=user["role"])
+    
+    return user_profile
+
 
 @auth_endpoints.get("/protected")
 def protected_route(credentials : HTTPAuthorizationCredentials = Depends(PrivateRoute(roles=["admin" , "user"]))):

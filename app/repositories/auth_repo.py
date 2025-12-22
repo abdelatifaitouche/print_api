@@ -20,8 +20,10 @@ class AuthRepository:
         return result
  
 
-    def list():
-        return
+    def list(self , db :Session):
+        stmt = select(User)
+        result = db.execute(stmt).scalars().all()
+        return result
 
     def get_by_id():
         return

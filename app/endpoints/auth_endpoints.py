@@ -64,6 +64,13 @@ def get_user_profile(user : dict = Depends(PrivateRoute(roles=[Roles.ADMIN , Rol
     return user_profile
 
 
+@auth_endpoints.get("/users" , response_model=List[User])
+def list_users(db : Session = Depends(get_db) , user : dict = Depends(PrivateRoute(roles=[Roles.ADMIN])))-> List[User]:
+    users : List[User] = auth_service.get_all_users(db)
+    return users
+
+
+
 @auth_endpoints.get("/protected")
 def protected_route(credentials : HTTPAuthorizationCredentials = Depends(PrivateRoute(roles=["admin" , "user"]))):
     return "testing"

@@ -66,6 +66,13 @@ class AuthService :
         access_token : str = self.__jwt_manager.generate_token(user_data = {"id" : user.id , "username":user.username , "email" : user.email , "role":user.role})
         
         return access_token
+    
+
+    def get_all_users(db : Session) -> List[User]:
+        
+        users : List[User] = self.__auth_repo.list(db)
+        
+        return users 
 
 
     def get_user_by_email(self):

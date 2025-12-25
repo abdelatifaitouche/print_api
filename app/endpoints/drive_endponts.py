@@ -27,6 +27,11 @@ def list_all_folders():
     return folders
 
 
+@drive_endpoints.get("/{folder_id}")
+def list_files_per_folder(folder_id : str):
+    files = gdm.list_files(folder_id)
+    return files
+
 
 @drive_endpoints.get("/storage")
 def get_storage():

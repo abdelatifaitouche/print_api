@@ -62,18 +62,36 @@ class GoogleDriveManager :
 
         return folder['id']
 
-    def list_files(self):
-        folder_name = "DriveApiTest"
-
-        response = (self.__client.files().list(
-            pageSize=10, fields="nextPageToken, files(id, name)"
-        ).execute())
-        
-        folders = response.get("files" , [])
-
-        print(folders)
-
     
+    def list_files(self, folder_id: str):
+        """
+        Lists files and subfolders inside the given folder_id.
+        """
+        query = (
+            f"'{folder_id}' in parents "
+            "and trashed=false"
+            # Remove mimeType filter if you want both files and folders
+            # Or keep it if you only want folders:
+            # "and mimeType='application/vnd.google-apps.folder'"
+         )
+
+        try:
+            response = self.__client.files().list(
+                q=query,
+                pageSize=100,  # Increase for better performance
+                fields="nextPageToken, files(id, name, mimeType, size, webViewLink, createdTime)",
+                supportsAllDrives=True,          # ← Critical for shared folders!
+                includeItemsFromAllDrives=True   # ← Critical!
+            ).execute()
+
+            items = response.get('files', [])
+            return items
+
+        except Exception as e:
+            print(f"Error listing files: {e}")
+            return []
+
+
     def get_storage_data(self):
         about = self.__client.about().get(fields="storageQuota").execute()
         quota = about.get('storageQuota' , {})

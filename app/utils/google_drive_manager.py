@@ -12,7 +12,7 @@ class GoogleDriveManager :
         self.SCOPES = ["https://www.googleapis.com/auth/drive"]
         self.__creds = self.__authenticate()
         self.__client =  self.__get_client()
-
+        self.__drive_parent_folder = "1Y0_n_Pqd1rj5cCJscsqzEwr_f3fZcg72"
 
     def __authenticate(self):
         return service_account.Credentials.from_service_account_file(self.__service_file , scopes=self.SCOPES,)
@@ -49,14 +49,14 @@ class GoogleDriveManager :
     def download_file(self):
         pass
     
-    def create_folder(self, folder_name : str , parent_id : str | None = None)->str :
+    def create_folder(self, folder_name : str)->str :
         metadata = {
             "name" :folder_name,
             "mimeType":"application/vnd.google-apps.folder"
         }
 
-        if parent_id : 
-            metadata["parents"]= parent_id
+         
+        metadata["parents"]= [self.__drive_parent_folder]
 
         folder = (self.__client.files().create(body=metadata , fields="id, name").execute())
 
@@ -73,18 +73,22 @@ class GoogleDriveManager :
 
         print(folders)
 
+    
+    def get_storage_data(self):
+        about = self.__client.about().get(fields="storageQuota").execute()
+        quota = about.get('storageQuota' , {})
+        return quota
 
     def list_folders(self):
         """
         Lists all folders in the root directory of the service account's Drive.
         """
-        query = "mimeType='application/vnd.google-apps.folder' and 'root' in parents"
+        query = f"'{self.__drive_parent_folder}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false"
         response = self.__client.files().list(
                 q=query,
                 pageSize=100,
-                fields="nextPageToken, files(id, name)"
+                fields="nextPageToken, files(id, name , webViewLink , createdTime)"
             ).execute()
 
         folders = response.get("files", [])
-        for folder in folders:
-            print(f"Folder Name: {folder['name']}, ID: {folder['id']}")
+        return folders

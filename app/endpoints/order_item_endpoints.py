@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter , UploadFile , File
 from app.services.order_item_service import OrderItemService
 from app.schemas.order_item_schema import OrderItemCreate,OrderItemRead
 from app.config.database import get_db
@@ -17,6 +17,6 @@ def index():
 
 
 @order_item_endpoints.post("/" , response_model=OrderItemRead)
-def create_order_item(order_item_data : OrderItemRead , db : Session = Depends(get_db))->OrderItemRead:
+def create_order_item(order_item_data : OrderItemRead ,file : UploadFile = File(...) ,  db : Session = Depends(get_db))->OrderItemRead:
     order = order_item_service.create(order_item_data , db)
     return order

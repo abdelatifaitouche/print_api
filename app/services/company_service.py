@@ -15,7 +15,7 @@ class CompanyService(ServiceInterface):
         """
         self.__repo = CompanyRepository()
 
-    def create(self , company_data : CompanyCreate , db : Session , user_id : str|None = None)->CompanyCreate:
+    def create(self , company_data : CompanyCreate , db : Session , user_id : str|None = None)->CompanyRead:
         """
             FIRST CREATE THE FOLDER DRIVER
         """
@@ -37,12 +37,12 @@ class CompanyService(ServiceInterface):
 
         process_folder_creation.delay(company_id=created_model.id , folder_name= company_data.name+"Drive")
 
-        return company_data
+        return CompanyRead.from_orm(created_model)
 
 
-    def list(self , db:Session , user_id : str | None = None)->List[CompanyRead]:
+    def list(self , db:Session)->List[CompanyRead]:
         
-        companies_model : List[CompanyModel] = self.__repo.list(db , user_id)
+        companies_model : List[CompanyModel] = self.__repo.list(db , None)
 
         if not companies_model :
 

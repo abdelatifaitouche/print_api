@@ -14,7 +14,7 @@ company_endpoints = APIRouter()
 company_service = CompanyService()
 
 @company_endpoints.get("/{company_id}" , response_model=CompanyRead)
-def get_company(company_id : str , db : Session = Depends(get_db) , user : dict = Depends(PrivateRoute(roles=["admin" , "user"]))):
+def get_company(company_id : str , db : Session = Depends(get_db) , user : dict = Depends(PrivateRoute(roles=[Roles.ADMIN]))):
     company : CompanyRead = company_service.get_by_id(company_id , db)
     return company
 
@@ -22,14 +22,14 @@ def get_company(company_id : str , db : Session = Depends(get_db) , user : dict 
 @company_endpoints.post('/' , response_model=CompanyRead)
 def create_company(company_data : CompanyCreate , db:Session=Depends(get_db), user : dict=Depends(PrivateRoute(roles=[Roles.ADMIN]))): 
     print("user" , user)
-    company : CompanyCreate = company_service.create(company_data , db , user["id"])
+    company : CompanyRead = company_service.create(company_data , db , user["id"])
 
     return company
 
 @company_endpoints.get('/' , response_model=List[CompanyRead])
 def list_companies(db : Session = Depends(get_db) , user : dict = Depends(PrivateRoute(roles=[Roles.ADMIN])))->List[CompanyRead]:
-    
-    companies : List[CompanyRead] = company_service.list(db , user["id"])
+    print(user) 
+    companies : List[CompanyRead] = company_service.list(db)
 
     return companies
 

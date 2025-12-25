@@ -14,7 +14,7 @@ class CompanyRead(BaseModel):
     folder_status : FolderStatus | None = FolderStatus.PENDING
     drive_folder_id : str | None = None
     created_at : datetime 
-    created_by : UUID
+    created_by : UUID | None = None
     model_config = {'from_attributes' : True}
 
 class CompanyCreate(BaseModel):

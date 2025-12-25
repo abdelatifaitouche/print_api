@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.models.user import User as UserDB
 from app.utils.password_utils import encrypt_password , check_password
 from app.utils.jwt_utils import JwtManager
-
+from typing import List
 class AuthService : 
     
     def __init__(self):
@@ -12,15 +12,6 @@ class AuthService :
         self.__jwt_manager = JwtManager()
 
     def create_user(self , user_data : UserCreate , db : Session) -> User:
-        """
-            To create a user, Grab the UserCreate schema, validate the data 
-            check if the provided email is not used , 
-            check if the password length is more than 6 chars
-
-            hash the password,
-            save it into the db
-            and return a success response with the user model
-        """
         
         if not user_data.email or not user_data.password : 
             raise Exception("please provide a valid email or password")
@@ -68,7 +59,7 @@ class AuthService :
         return access_token
     
 
-    def get_all_users(db : Session) -> List[User]:
+    def get_all_users(self , db : Session) -> List[User]:
         
         users : List[User] = self.__auth_repo.list(db)
         

@@ -1,4 +1,4 @@
-from fastapi import APIRouter , Depends ,Response
+from fastapi import APIRouter , Depends ,Response , status
 
 from app.schemas.user_schema import UserCreate , User , UserLogin
 from app.services.auth_service import AuthService
@@ -7,6 +7,8 @@ from sqlalchemy.orm import Session
 from fastapi.security import HTTPAuthorizationCredentials
 from app.utils.private_route import PrivateRoute
 from app.enums.roles import Roles
+from typing import List
+
 auth_endpoints = APIRouter()
 
 auth_service = AuthService()
@@ -56,7 +58,7 @@ def logout_user(response:Response):
 #get user profile (user_data)
 #get all users (only for the admin)
 
-@auth_endpoints.get("/me" , response_model=User)
+@auth_endpoints.get("/me" , response_model=User , status_code=status.HTTP_200_OK)
 def get_user_profile(user : dict = Depends(PrivateRoute(roles=[Roles.ADMIN , Roles.USER]))):
     print(user) 
     user_profile : User = User(username = user["name"] , email=user["email"] , role=user["role"])

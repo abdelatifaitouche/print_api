@@ -6,11 +6,32 @@ from app.utils.google_drive_manager import GoogleDriveManager
 drive_endpoints = APIRouter()
 gdm = GoogleDriveManager()
 
+
+"""
+CREATE FOLDERS 
+DELETE FOLDERS
+UPDATE A FOLDER
+LIST FOLDERS
+"""    
+
+@drive_endpoints.post("/")
+def create_folder():
+    return
+
+
+
+
 @drive_endpoints.get("/")
 def list_all_folders():
-    gdm.list_folders()
-    return "testing the listing"
+    folders =  gdm.list_folders()
+    return folders
 
+
+
+@drive_endpoints.get("/storage")
+def get_storage():
+    storage = gdm.get_storage_data()
+    return storage
 
 
 

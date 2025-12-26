@@ -2,3 +2,7 @@ from .base import Base
 from .order import OrderModel
 from .order_item import OrderItem
 from .company import CompanyModel
+from .product import ProductModel
+from .product_raw_material import ProductRawMaterial
+from .raw_material import RawMaterial
+from .printing_type import PrintingType

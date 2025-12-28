@@ -7,6 +7,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.endpoints.company_endpoints import company_endpoints
 from app.endpoints.drive_endponts import drive_endpoints
 from app.endpoints.raw_material_endpoints import raw_material_endpoints
+from app.endpoints.product_endpoints import product_endpoints
+
+
 version = "v1"
 
 app = FastAPI(
@@ -36,6 +39,9 @@ app.include_router(order_item_endpoints , prefix=f"/api/{version}/items")
 app.include_router(company_endpoints , prefix=f"/api/{version}/company")
 app.include_router(drive_endpoints , prefix=f"/api/{version}/drive")
 app.include_router(raw_material_endpoints , prefix=f"/api/{version}/materials")
+app.include_router(product_endpoints , prefix=f"/api/{version}/products")
+
+
 @app.get("/")
 def home():
     return "home routes"

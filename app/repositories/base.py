@@ -54,8 +54,12 @@ class BaseRepository(Generic[T]):
             raise e
 
     def delete(self , entity_id : str , db :Session) -> bool : 
-        stmt = delete(self.MODEL).where(self.MODEL.id == entity_id)
-        result = db.execute(stmt)
-        db.commit()
+        try : 
+            stmt = delete(self.MODEL).where(self.MODEL.id == entity_id)
+            result = db.execute(stmt)
+            db.commit()
+            return result.rowcount > 0
+        except Exception as e : 
+            db.rollback()
+            raise e
         
-        return result.rowcount > 0

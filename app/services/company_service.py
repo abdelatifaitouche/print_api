@@ -7,7 +7,13 @@ from app.models.company import CompanyModel
 from app.utils.tasks import process_folder_creation
 from typing import List
 
-class CompanyService(ServiceInterface):
+from app.services.base_service import BaseService
+
+
+class CompanyService(BaseService[CompanyModel , CompanyCreate , CompanyRead , CompanyUpdate]):
+
+    repo = CompanyRepository()
+    READ_SCHEMA = CompanyRead
 
     def __init__(self):
         """
@@ -40,16 +46,6 @@ class CompanyService(ServiceInterface):
         return CompanyRead.from_orm(created_model)
 
 
-    def list(self , db:Session)->List[CompanyRead]:
-        
-        companies_model : List[CompanyModel] = self.__repo.list(db , None)
-
-        if not companies_model :
-
-            raise Exception("error getting the companies")
-        
-        return [CompanyRead.from_orm(company) for company in companies_model]
-    
     
 
     def get_by_id(self , company_id : str , db:Session)->CompanyRead:

@@ -11,7 +11,7 @@ class OrderModel(Base):
          server_default=text("concat('ORD#', lpad(nextval('order_number_seq')::text, 5, '0'))")
     )
     status : Mapped[str] = mapped_column(String , server_default=OrderStatus.PENDING.value)
-    order_price:Mapped[Float] = mapped_column(Float , nullable=False) 
+    order_price:Mapped[Float] = mapped_column(Float , nullable=True) 
     created_by : Mapped[str] = mapped_column(String , ForeignKey("users.id") , nullable=True)
 
     items : Mapped[list["OrderItem"]] = relationship(

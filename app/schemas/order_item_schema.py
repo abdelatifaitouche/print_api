@@ -2,7 +2,7 @@
 from pydantic import BaseModel
 from uuid import UUID
 from app.enums.order_items_status import OrderItemStatus
-
+from .product_schema import ProductLightRead
 
 class OrderItemBase(BaseModel):
     item_name : str
@@ -12,8 +12,7 @@ class OrderItemBase(BaseModel):
 
 
 class OrderItemCreate(BaseModel):
-    order_id : str
-    item_name : str
+    product_id : str
     quantity : int
 
     model_config = {"from_attributes" : True}
@@ -22,8 +21,10 @@ class OrderItemCreate(BaseModel):
 
 class OrderItemRead(BaseModel):
     id : UUID
-    order_id :str
-    item_name : str
+    order_id :UUID  
+    item_number : str
+    item_price : float
+    product :ProductLightRead
     status : OrderItemStatus = OrderItemStatus.PENDING
     quantity : int
     model_config = {"from_attributes":True}

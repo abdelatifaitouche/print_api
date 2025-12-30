@@ -13,6 +13,8 @@ class ProductModel(Base) :
 
     raw_materials : Mapped[List["RawMaterial"]] = relationship(secondary="product_material" , back_populates="products")
 
-
+    order_items: Mapped[List["OrderItem"]] = relationship(
+        back_populates="product"
+    )
 
 

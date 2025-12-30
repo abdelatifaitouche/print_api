@@ -30,6 +30,15 @@ class ProductCreate(BaseModel):
     raw_materials : List[ProductMaterialCreate]
 
 
+class ProductLightRead(BaseModel):
+    id : str
+    name : str
+    description : str
+    base_price : float | None = None
+    
+    model_config = {"from_attributes" : True}
+
+
 class ProductUpdate(ProductCreate):
     pass
 

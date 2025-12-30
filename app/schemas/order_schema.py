@@ -8,8 +8,8 @@ from app.enums.order_enums import OrderStatus
 
 class OrderRead(BaseModel):
     id : UUID
-    order_name : str
-    order_price: int
+    order_number : str
+    order_price: int | None  = None
     status : OrderStatus = OrderStatus.PENDING
     created_at : datetime
     updated_at : datetime
@@ -20,7 +20,5 @@ class OrderRead(BaseModel):
             }
 
 class OrderCreate(BaseModel): 
-    order_name : str
-    order_price : int
-    items : List[OrderItemBase]
+    items : List[OrderItemCreate]
     model_config = {"from_attributes" : True}

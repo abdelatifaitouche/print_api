@@ -31,7 +31,7 @@ def get_raw_material_by_id(material_id : str , db : Session = Depends(get_db)):
     material : RawMaterialRead = raw_material_service.get_by_id(material_id , db)
     return material
 
-@raw_material_endpoints.patch("/{material_id}")
+@raw_material_endpoints.patch("/{material_id}/")
 def update_raw_material(material_id : str , data : RawMaterialUpdate ,  db : Session = Depends(get_db)):
     material : RawMaterialRead = raw_material_service.update(material_id , data , db)
     return material
@@ -39,7 +39,7 @@ def update_raw_material(material_id : str , data : RawMaterialUpdate ,  db : Ses
 
 
 
-@raw_material_endpoints.delete("/{material_id}")
+@raw_material_endpoints.delete("/{material_id}/")
 def delete_raw_material(material_id : str , db : Session = Depends(get_db)):
 
     return raw_material_service.delete(material_id , db)

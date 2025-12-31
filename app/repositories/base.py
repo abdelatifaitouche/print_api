@@ -12,6 +12,7 @@ class BaseRepository(Generic[T]):
     def create(self , data : T ,  db : Session)->T:
         try : 
             db.add(data)
+            db.commit()
             db.flush()
             return data
         except Exception as e : 

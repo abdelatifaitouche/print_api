@@ -10,6 +10,7 @@ class UserCreate(BaseModel):
     model_config = {"from_attributes" : True}
 
 class User(BaseModel):
+    id : str
     username : str
     email : str
     role : Roles | None = None

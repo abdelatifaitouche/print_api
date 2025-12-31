@@ -70,8 +70,14 @@ class AuthService :
         return
 
 
-    def get_user_by_id(self):
-        return
+    def get_user_by_id(self , user_id :str , db:Session)-> User:
+        
+        user : User = self.__auth_repo.get_by_id(user_id , db) 
+
+        if not user : 
+            raise Exception("no user found")
+        
+        return User.from_orm(user)
 
     def get_user(self):
         return

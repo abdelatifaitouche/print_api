@@ -25,5 +25,7 @@ class AuthRepository:
         result = db.execute(stmt).scalars().all()
         return result
 
-    def get_by_id():
-        return
+    def get_by_id(self, user_id : str ,  db : Session)->User :
+        stmt = select(User).where(User.id == user_id)
+        result = db.execute(stmt).scalar_one_or_none()
+        return result

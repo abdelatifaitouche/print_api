@@ -10,7 +10,7 @@ class OrderRead(BaseModel):
     id : UUID
     order_number : str
     order_price: int | None  = None
-    status : OrderStatus = OrderStatus.PENDING
+    status : str
     created_at : datetime
     updated_at : datetime
     created_by : UUID

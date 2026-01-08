@@ -42,5 +42,5 @@ def get_storage():
 
 @drive_endpoints.post('/upload')
 def upload_file(file : UploadFile = File(...)):
-    id = gdm.upload_file(file)
+    id = gdm.upload_file(file , "1iqsvTbXlhytlxpPRyyPlqTCUemcW4njC")
     return f"file id is : {id}"

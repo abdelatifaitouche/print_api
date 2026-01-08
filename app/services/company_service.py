@@ -33,7 +33,6 @@ class CompanyService(BaseService[CompanyModel , CompanyCreate , CompanyRead , Co
             #include some way to verify the email validity
             raise Exception("please enter a valid email") 
 
-        company_data.created_by = user_id
         model : CompanyModel = CompanyModel(**company_data.dict())
         created_model : CompanyModel = self.__repo.create(model , db)
         

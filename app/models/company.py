@@ -2,7 +2,7 @@ from .base import Base
 from sqlalchemy.orm import Mapped , mapped_column , relationship
 from sqlalchemy import String , ForeignKey
 from app.enums.company_enums import FolderStatus
-
+from typing import List
 
 
 class CompanyModel(Base):
@@ -16,7 +16,8 @@ class CompanyModel(Base):
     drive_folder_id : Mapped[str] = mapped_column(String , nullable=True)    
     folder_status : Mapped[str] = mapped_column(String , server_default=FolderStatus.PENDING.value , nullable=False)
     
-    created_by : Mapped[str] = mapped_column(String , ForeignKey("users.id") , nullable=True)
+    users: Mapped[List["User"]] = relationship(back_populates="company", cascade="all, delete-orphan")
+    
 
     def __repr__(self):
         return f"<Company : {self.name}>"

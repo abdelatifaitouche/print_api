@@ -1,5 +1,5 @@
-from sqlalchemy.orm import Mapped , mapped_column 
-from sqlalchemy import String , Integer
+from sqlalchemy.orm import Mapped , mapped_column , relationship 
+from sqlalchemy import String , Integer , ForeignKey
 from .base import Base
 from app.enums.roles import Roles
 
@@ -11,3 +11,6 @@ class User(Base):
     email : Mapped[str] = mapped_column(String , nullable=False , unique=True)
     password : Mapped[str] = mapped_column(String , nullable=False)
     role : Mapped[str] = mapped_column(String , server_default = Roles.USER)
+    
+    company_id: Mapped[str] = mapped_column(String, ForeignKey("companies.id"), nullable=True)
+    company: Mapped["CompanyModel"] = relationship(back_populates="users")

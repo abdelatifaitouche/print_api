@@ -4,10 +4,18 @@ from enum import StrEnum
 
 
 class OrderStatus(StrEnum):
-    PENDING = "pending" 
-    PROCESSING = "processing" 
-    PARTIALLY_SHIPPED = "partially_shipped" 
-    SHIPPED = "shipped"       
-    DELIVERED = "delivered"   
-    CANCELLED = "cancelled"   
-    RETURNED = "returned"     
+    PENDING = "PENDING"
+    IN_REVIEW  = "IN_REVIEW"
+    ACCEPTED = "ACCEPTED"
+    WAIT_FOR_PROCESSING = "WAIT_FOR_PROCESSING"
+    PROCESSING = "PROCESSING" 
+    PROCESSED = "PROCESSED"
+    READY_FOR_DELIVERY = "READY_FOR_DELIVERY"     
+    DELIVERED = "DELIVRED"   
+    PAIED = "PAIED"
+    FINISHED = "FINISHED"
+    CANCELLED = "CANCELLED"   
+    REJECTED = "REJECTED"
+
+class OrderItemStatus(StrEnum):
+    pass

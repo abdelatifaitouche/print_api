@@ -22,7 +22,7 @@ class AuthService :
         
         hashed_password = encrypt_password(user_data.password)
 
-        user_model = UserDB(username = user_data.username , email = user_data.email , password = hashed_password , role = user_data.role)
+        user_model = UserDB(username = user_data.username , email = user_data.email , password = hashed_password , role = user_data.role , company_id=user_data.company_id)
 
         user = self.__auth_repo.create(user_model , db)
         

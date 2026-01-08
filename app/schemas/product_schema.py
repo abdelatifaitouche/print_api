@@ -39,6 +39,8 @@ class ProductLightRead(BaseModel):
     model_config = {"from_attributes" : True}
 
 
-class ProductUpdate(ProductCreate):
-    pass
+class ProductUpdate(BaseModel):
+    name : str | None = None
+    base_price : float | None = None
+    description : str | None = None
 

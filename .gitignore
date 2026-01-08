@@ -47,7 +47,8 @@ test_db.db
 
 # Google Service Account (keep secret!)
 drive_api.json
-
+printflow_dev.json
+printshop_token.pickle
 # macOS
 .DS_Store
 

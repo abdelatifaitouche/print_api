@@ -22,7 +22,7 @@ def index():
 
 
 @auth_endpoints.post("/register_user/" , response_model = User)
-def register_user(user_data : UserCreate , db:Session = Depends(get_db) , user:dict = Depends(PrivateRoute(roles=[Roles.ADMIN]))):
+def register_user(user_data : UserCreate , db:Session = Depends(get_db)):
     user = auth_service.create_user(user_data , db)
     return user
 

@@ -19,4 +19,10 @@ class OrderItem(Base):
     item_price : Mapped[Float] = mapped_column(Float , default=0.0 , nullable=True)
     product : Mapped["ProductModel"] = relationship(back_populates="order_items")
     order : Mapped["OrderModel"] = relationship(back_populates="items")
-    
+
+    file : Mapped["UploadedFile"] = relationship(
+            "UploadedFile" , 
+            back_populates = "order_item",
+            uselist=False , 
+            cascade = "all, delete-orphan"
+    )

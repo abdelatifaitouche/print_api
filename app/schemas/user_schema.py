@@ -6,7 +6,7 @@ class UserCreate(BaseModel):
     email : str
     password : str
     role : Roles
-    company_id : str
+    company_id : str | None = None
     model_config = {"from_attributes" : True}
 
 class User(BaseModel):

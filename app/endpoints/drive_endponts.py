@@ -1,7 +1,7 @@
 from fastapi import APIRouter , UploadFile , File
 from app.utils.google_drive_manager import GoogleDriveManager
-
-
+from typing import List
+from pydantic import BaseModel
 
 drive_endpoints = APIRouter()
 gdm = GoogleDriveManager()
@@ -41,6 +41,6 @@ def get_storage():
 
 
 @drive_endpoints.post('/upload')
-def upload_file(file : UploadFile = File(...)):
-    id = gdm.upload_file(file , "1iqsvTbXlhytlxpPRyyPlqTCUemcW4njC")
-    return f"file id is : {id}"
+def upload_file():
+    #id = gdm.upload_file(file , "1iqsvTbXlhytlxpPRyyPlqTCUemcW4njC")
+    return f"uploaded check logs"

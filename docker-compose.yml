@@ -9,6 +9,7 @@ services:
       - .env
     volumes:
       - .:/app
+      - ./uploads:/app/uploads
     ports : 
       - "8000:8000"
     depends_on:
@@ -21,11 +22,12 @@ services:
   celery:
     build: .
     container_name: celery_worker
-    command: celery -A app.utils.tasks worker --loglevel=info
+    command: celery -A app.utils.tasks worker --loglevel=info -c 4 --pool=prefork --autoscale=4,2
     env_file:
       - .env
     volumes:
       - .:/app
+      - ./uploads:/app/uploads
     depends_on:
       - rabbitmq
       - redis

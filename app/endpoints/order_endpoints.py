@@ -1,14 +1,15 @@
-from fastapi import APIRouter ,  UploadFile
+from fastapi import APIRouter ,  UploadFile , File , HTTPException , Form
 from app.schemas.order_schema import OrderCreate , OrderRead
 from app.config.database import get_db
 from fastapi import Depends
 from app.services.order_service import OrderService
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List , Annotated
 from app.utils.private_route import PrivateRoute
 from app.utils.google_drive_manager import GoogleDriveManager
 from app.enums.permissions import Permissions
 from app.enums.roles import Roles
+import json
 order_endpoint = APIRouter(
 )
 order_service = OrderService()
@@ -41,8 +42,19 @@ def get_order_by_id(order_id : str , db : Session = Depends(get_db)):
 
 
 @order_endpoint.post("/" , response_model=OrderRead)
-def create_order(order_data : OrderCreate , db:Session = Depends(get_db) , user : dict = Depends(PrivateRoute(roles=[Roles.ADMIN , Roles.USER]))) -> OrderRead:
-    order = order_service.create(db , order_data , user)
+def create_order(items_data : Annotated[str , Form(...)]  , files : List[UploadFile] = File(...) ,  db:Session = Depends(get_db) , user : dict = Depends(PrivateRoute(roles=[Roles.ADMIN , Roles.USER]))) -> OrderRead:
+    
+    try : 
+        raw_data = json.loads(items_data)
+        order_data = OrderCreate(items=raw_data)
+    except (json.JSONDecodeError , ValueError) as e :
+        raise HTTPException(422 , f"invalid format for the order items")
+
+    
+    if len(files) != len(order_data.items) : 
+        raise HTTPException(422 , "Number of file doesnt match the items")
+
+    order = order_service.create(db , order_data , user , files)
     return order
 
 

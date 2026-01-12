@@ -9,7 +9,6 @@ from app.endpoints.drive_endponts import drive_endpoints
 from app.endpoints.raw_material_endpoints import raw_material_endpoints
 from app.endpoints.product_endpoints import product_endpoints
 
-
 version = "v1"
 
 app = FastAPI(

@@ -6,3 +6,4 @@ from .product import ProductModel
 from .product_raw_material import ProductRawMaterial
 from .raw_material import RawMaterial
 from .printing_type import PrintingType
+from .uploaded_file import UploadedFile

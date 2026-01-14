@@ -1,6 +1,6 @@
 from fastapi import APIRouter , Depends ,Response , status
 
-from app.schemas.user_schema import UserCreate , User , UserLogin
+from app.schemas.user_schema import UserCreate , User , UserLogin , UserAdminUpdate
 from app.services.auth_service import AuthService
 from app.config.database import get_db
 from sqlalchemy.orm import Session
@@ -23,7 +23,7 @@ def index():
 
 @auth_endpoints.post("/register_user/" , response_model = User)
 def register_user(user_data : UserCreate , db:Session = Depends(get_db)):
-    user = auth_service.create_user(user_data , db)
+    user = auth_service.create(user_data , db)
     return user
 
 
@@ -65,18 +65,27 @@ def get_user_by_id(user_id:str , db:Session=Depends(get_db) , user:dict = Depend
     return user
 
 
-@auth_endpoints.get("/me" , response_model=User , status_code=status.HTTP_200_OK)
+@auth_endpoints.get("/me"  , status_code=status.HTTP_200_OK)
 def get_user_profile(user : dict = Depends(PrivateRoute(roles=[Roles.ADMIN , Roles.USER]))):
-    print(user) 
-    user_profile : User = User(id = user["id"] , username = user["name"] , email=user["email"] , role=user["role"])
+    user_profile : dict = {"id":user["id"] , 
+                           "username" : user["name"] ,
+                           "email":user["email"] ,
+                           "role":user["role"] ,
+                            "company_id":user["company_id"]}
     
     return user_profile
 
 
 @auth_endpoints.get("/users" , response_model=List[User])
 def list_users(db : Session = Depends(get_db) , user : dict = Depends(PrivateRoute(roles=[Roles.ADMIN])))-> List[User]:
-    users : List[User] = auth_service.get_all_users(db)
+    users : List[User] = auth_service.list(db)
     return users
+
+@auth_endpoints.patch("/users/{user_id}/" , response_model=User , status_code=status.HTTP_200_OK)
+def admin_update_user(user_id : str , data : UserAdminUpdate ,  db:Session=Depends(get_db) , user:dict=Depends(PrivateRoute(roles=[Roles.ADMIN]))):
+    user : User = auth_service.update(user_id ,data ,  db)
+    return user
+
 
 
 

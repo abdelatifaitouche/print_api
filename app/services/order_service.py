@@ -72,7 +72,8 @@ class OrderService(ServiceInterface) :
         file_name = f"{uuid.uuid4()}_{file.filename}"
         file_path = self.UPLOAD_DIR / file_name
         
-        try : 
+        try :
+            #this is not good, gotta make it async using aiofiles
             with file_path.open("wb") as buffer : 
                 shutil.copyfileobj(file.file , buffer)
         except Exception as e : 
@@ -85,6 +86,19 @@ class OrderService(ServiceInterface) :
         return file_name , file_path
 
     def create(self, db: Session, order_data: OrderCreate, user: dict, files) -> OrderRead:
+        from app.services.company_service import CompanyService
+        from app.schemas.company_schema import CompanyRead
+        company_service = CompanyService()
+        company_data : CompanyRead = company_service.get_by_id(user["company_id"] , db)
+        
+        if not company_data : 
+            raise ValueError("No company found with this id")
+        
+        if not company_data.drive_folder_id or company_data.folder_status != "CREATED" : 
+            raise Exception("Folder blocked for this company")
+            
+        drive_folder : str = company_data.drive_folder_id 
+        
         try:
             order = OrderModel(created_by=user["id"])
             order_id = self.__add_to_db(order, db).id
@@ -102,7 +116,7 @@ class OrderService(ServiceInterface) :
                         file_name=file_name,
                         status="pending",
                         order_item_id=order_item.id,
-                        parent_drive_folder="empty for now"
+                        parent_drive_folder=str(drive_folder)
                     )
                     uploaded_file_id = self.__add_to_db(uploaded_file, db).id
                 

@@ -72,9 +72,14 @@ class JwtManager :
             "alg" : "sha256" , "typ" :"JWT" 
         }
         if is_refresh :  
-            payload : dict = self.__payload_factory.refresh_token_payload(user_data["username"] , user_data["email"] , user_data["role"])
+            payload : dict = self.__payload_factory.refresh_token_payload(user_data["username"] ,
+                                                                          user_data["email"] , user_data["role"])
         else :             
-            payload : dict = self.__payload_factory.access_token_payload(user_data["id"] , user_data["username"] , user_data["email"] , user_data["role"])
+            payload : dict = self.__payload_factory.access_token_payload(user_data["id"] , 
+                                                                         user_data["username"] ,
+                                                                         user_data["email"] ,
+                                                                         user_data["role"],
+                                                                         user_data["company_id"])
 
         encoded_header = self.__base_64_encoding(header)
         encoded_payload = self.__base_64_encoding(payload)

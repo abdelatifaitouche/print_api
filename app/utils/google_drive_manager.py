@@ -50,10 +50,10 @@ class GoogleDriveManager:
 
         return creds
 
-    def upload_file(self,file_name : str ,  file_path : str , folder_id: str | None = None):
+    def upload_file(self,file_name : str ,  file_path : str , folder_id: str):
         
         try:
-            target_folder = folder_id or self.parent_folder_id
+            target_folder = folder_id
 
             file_metadata = {
                 "name": file_name,

@@ -91,7 +91,7 @@ def process_file_upload(self, uploaded_file_id: str, file_name: str, file_path: 
         gdm = GoogleDriveManager()
         
         logger.info(f"Calling upload_file for: {file_name}")
-        google_drive_file_id = gdm.upload_file(file_name, file_path)
+        google_drive_file_id = gdm.upload_file(file_name, file_path , folder_id =  uploaded_file.parent_drive_folder)
         logger.info(f"Upload returned: {google_drive_file_id}")
         
         if not google_drive_file_id:

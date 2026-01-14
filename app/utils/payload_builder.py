@@ -1,6 +1,10 @@
 from datetime import datetime, timedelta
 
-
+"""
+THIS IS A BULLSHIT CODE 
+DONE FOR NO PURPOSE AT ALL
+DA FUCK AM DOING
+"""    
 
 class JwtPayloadFactory : 
     
@@ -8,12 +12,13 @@ class JwtPayloadFactory :
     __refresh_exp = 5000000
 
     @staticmethod
-    def access_token_payload(id :str , name : str ,email : str ,  role : str)->dict:
+    def access_token_payload(id :str , name : str ,email : str ,  role : str , company_id : str)->dict:
         return {
             "id" :  id , 
             "name" : name , 
             "email" : email,
-            "role" : role , 
+            "role" : role ,
+            "company_id" : company_id , 
             "exp" :int((datetime.utcnow() + timedelta(seconds=JwtPayloadFactory.__access_exp)).timestamp())
         }
 

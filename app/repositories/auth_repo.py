@@ -1,11 +1,12 @@
 from app.models.user import User
 from sqlalchemy.orm import Session
 from sqlalchemy import select
+from app.repositories.base import BaseRepository
 
 
-
-class AuthRepository:
-
+class AuthRepository(BaseRepository["User"]):
+    
+    MODEL = User
 
     def create(self , user : User , db:Session) -> User:
         db.add(user)

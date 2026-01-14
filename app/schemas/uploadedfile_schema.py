@@ -6,7 +6,8 @@ class UploadedFileBase(BaseModel):
 
 
 class UploadedFileRead(BaseModel):
-    file_name : str 
+    file_name : str
+    google_file_id : str | None =None
     status : str
 
     model_config = {"from_attributes" : True}

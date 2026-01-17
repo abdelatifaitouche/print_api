@@ -59,14 +59,15 @@ def logout_user(response:Response):
 #get all users (only for the admin)
 
 @auth_endpoints.get("/users/{user_id}" , response_model=User , status_code=status.HTTP_200_OK)
-def get_user_by_id(user_id:str , db:Session=Depends(get_db) , user:dict = Depends(PrivateRoute(roles=[Roles.ADMIN]))):
+def get_user_by_id(user_id:str , db:Session=Depends(get_db) ,
+                   user:dict = Depends(PrivateRoute())):
     user : User = auth_service.get_user_by_id(user_id , db)
 
     return user
 
 
 @auth_endpoints.get("/me"  , status_code=status.HTTP_200_OK)
-def get_user_profile(user : dict = Depends(PrivateRoute(roles=[Roles.ADMIN , Roles.USER]))):
+def get_user_profile(user : dict = Depends(PrivateRoute())):
     user_profile : dict = {"id":user["id"] , 
                            "username" : user["name"] ,
                            "email":user["email"] ,
@@ -77,18 +78,17 @@ def get_user_profile(user : dict = Depends(PrivateRoute(roles=[Roles.ADMIN , Rol
 
 
 @auth_endpoints.get("/users" , response_model=List[User])
-def list_users(db : Session = Depends(get_db) , user : dict = Depends(PrivateRoute(roles=[Roles.ADMIN])))-> List[User]:
+def list_users(db : Session = Depends(get_db) ,
+               user : dict = Depends(PrivateRoute()))-> List[User]:
     users : List[User] = auth_service.list(db)
     return users
 
 @auth_endpoints.patch("/users/{user_id}/" , response_model=User , status_code=status.HTTP_200_OK)
-def admin_update_user(user_id : str , data : UserAdminUpdate ,  db:Session=Depends(get_db) , user:dict=Depends(PrivateRoute(roles=[Roles.ADMIN]))):
+def admin_update_user(user_id : str , data : UserAdminUpdate ,
+                      db:Session=Depends(get_db) ,
+                      user:dict=Depends(PrivateRoute())):
     user : User = auth_service.update(user_id ,data ,  db)
     return user
 
 
 
-
-@auth_endpoints.get("/protected")
-def protected_route(credentials : HTTPAuthorizationCredentials = Depends(PrivateRoute(roles=["admin" , "user"]))):
-    return "testing"

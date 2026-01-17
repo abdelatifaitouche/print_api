@@ -14,20 +14,23 @@ company_endpoints = APIRouter()
 company_service = CompanyService()
 
 @company_endpoints.get("/{company_id}" , response_model=CompanyRead)
-def get_company(company_id : str , db : Session = Depends(get_db) , user : dict = Depends(PrivateRoute(roles=[Roles.ADMIN]))):
+def get_company(company_id : str , db : Session = Depends(get_db) ,
+                user : dict = Depends(PrivateRoute())):
     company : CompanyRead = company_service.get_by_id(company_id , db)
     return company
 
 
 @company_endpoints.post('/' , response_model=CompanyRead)
-def create_company(company_data : CompanyCreate , db:Session=Depends(get_db), user : dict=Depends(PrivateRoute(roles=[Roles.ADMIN]))): 
+def create_company(company_data : CompanyCreate , db:Session=Depends(get_db),
+                   user : dict=Depends(PrivateRoute())): 
     print("user" , user)
     company : CompanyRead = company_service.create(company_data , db , user["id"])
 
     return company
 
 @company_endpoints.get('/' , response_model=List[CompanyRead])
-def list_companies(db : Session = Depends(get_db) , user : dict = Depends(PrivateRoute(roles=[Roles.ADMIN])))->List[CompanyRead]:
+def list_companies(db : Session = Depends(get_db) ,
+                   user : dict = Depends(PrivateRoute()))->List[CompanyRead]:
     print(user) 
     companies : List[CompanyRead] = company_service.list(db)
 
@@ -44,7 +47,8 @@ def update_company(company_id : str , company_data : CompanyUpdate , db:Session=
     return company
 
 @company_endpoints.delete("/{company_id}/")
-def delete_company(company_id : str , db:Session=Depends(get_db) , user : dict = Depends(PrivateRoute(roles=[Roles.ADMIN]))):
+def delete_company(company_id : str , db:Session=Depends(get_db) ,
+                   user : dict = Depends(PrivateRoute())):
 
     if not company_service.delete(company_id , db) : 
         return "not delete"

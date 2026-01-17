@@ -1,70 +1,70 @@
-from fastapi import APIRouter ,  UploadFile , File , HTTPException , Form
-from app.schemas.order_schema import OrderCreate , OrderRead
+from fastapi import APIRouter, UploadFile, File, HTTPException, Form
+from app.schemas.order_schema import OrderCreate, OrderRead
 from app.config.database import get_db
 from fastapi import Depends
 from app.services.order_service import OrderService
 from sqlalchemy.orm import Session
-from typing import List , Annotated
+from typing import List, Annotated
 from app.utils.private_route import PrivateRoute
 from app.utils.google_drive_manager import GoogleDriveManager
 from app.enums.permissions import Permissions
 from app.enums.roles import Roles
 import json
-order_endpoint = APIRouter(
-)
+from app.auth.permission_context import PermissionContext
+
+order_endpoint = APIRouter()
 order_service = OrderService()
 
 gdm = GoogleDriveManager()
 
 
-@order_endpoint.get("/" , response_model=List[OrderRead])
-def list_orders(db : Session= Depends(get_db) , user : dict = Depends(PrivateRoute(roles = [Roles.ADMIN ,Roles.USER]))):
-    
-    if user["perms"] == Permissions.CAN_SEE_ALL :  
-        return  order_service.list(db)
-    else :
-        return order_service.list(db , user["id"])
+def user_context(user: dict = Depends(PrivateRoute())) -> PermissionContext:
+    permission_context = PermissionContext(user_id=user["id"], role=user["role"])
+    return permission_context
 
 
-@order_endpoint.get("/user/{user_id}" , response_model=List[OrderRead])
-def get_orders_by_user(user_id : str , db : Session = Depends(get_db) , user:dict = Depends(PrivateRoute(roles=[Roles.ADMIN]))):
-    
-    orders  = order_service.list(db , user_id)
-    
+@order_endpoint.get("/")
+def list_orders(db: Session = Depends(get_db), ctx_perms: dict = Depends(user_context)):
+    orders = order_service.list(ctx_perms, db)
     return orders
 
-@order_endpoint.get("/{order_id}" , response_model=OrderRead)
-def get_order_by_id(order_id : str , db : Session = Depends(get_db)):
-    order = order_service.get_by_id(db , order_id)
+
+@order_endpoint.get("/user/{user_id}", response_model=List[OrderRead])
+def get_orders_by_user(
+    user_id: str, db: Session = Depends(get_db), user: dict = Depends(PrivateRoute())
+):
+    orders = order_service.list(db, user_id)
+
+    return orders
+
+
+@order_endpoint.get("/{order_id}", response_model=OrderRead)
+def get_order_by_id(order_id: str, db: Session = Depends(get_db)):
+    order = order_service.get_by_id(order_id, db)
     return order
 
 
-
-
-@order_endpoint.post("/" , response_model=OrderRead)
-def create_order(items_data : Annotated[str , Form(...)]  , files : List[UploadFile] = File(...) ,  db:Session = Depends(get_db) , user : dict = Depends(PrivateRoute(roles=[Roles.ADMIN , Roles.USER]))) -> OrderRead:
-    
-    try : 
+@order_endpoint.post("/", response_model=OrderRead)
+def create_order(
+    items_data: Annotated[str, Form(...)],
+    files: List[UploadFile] = File(...),
+    db: Session = Depends(get_db),
+    user: dict = Depends(PrivateRoute()),
+) -> OrderRead:
+    try:
         raw_data = json.loads(items_data)
         order_data = OrderCreate(items=raw_data)
-    except (json.JSONDecodeError , ValueError) as e :
-        raise HTTPException(422 , f"invalid format for the order items")
+    except (json.JSONDecodeError, ValueError) as e:
+        raise HTTPException(422, f"invalid format for the order items")
 
-    
-    if len(files) != len(order_data.items) : 
-        raise HTTPException(422 , "Number of file doesnt match the items")
+    if len(files) != len(order_data.items):
+        raise HTTPException(422, "Number of file doesnt match the items")
 
-    order = order_service.create(db , order_data , user , files)
+    order = order_service.create(db, order_data, user, files)
     return order
-
 
 
 @order_endpoint.get("/test_drive/")
 def test_drive():
     folder_id = gdm.create_folder("testfolder")
     return f"folder id {folder_id}"
-
-
-
-
-

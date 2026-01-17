@@ -19,14 +19,14 @@ class BaseRepository(Generic[T]):
             db.rollback()
             raise e
 
-    def list(self ,db :Session , user_id : str | None = None) -> List[T]:
+    def list(self ,db :Session , user_id : str | None = None , offset:int=0) -> List[T]:
         
         if user_id : 
-            stmt = select(self.MODEL).where(self.MODEL.created_by == user_id)
+            stmt = select(self.MODEL).where(self.MODEL.created_by == user_id).order_by(self.MODEL.created_at.desc()).limit(10).offset(offset)
             result = db.execute(stmt).scalars().all()
             return result
 
-        stmt = select(self.MODEL)
+        stmt = select(self.MODEL).order_by(self.MODEL.created_at.desc()).limit(10).offset(offset)
         result = db.execute(stmt).scalars().all()
 
         return result

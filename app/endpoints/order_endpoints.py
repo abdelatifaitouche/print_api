@@ -28,7 +28,7 @@ def list_orders(
         require_permission(Permissions.CAN_READ_ALL, Permissions.CAN_READ_ORDER)
     ),
 ):
-    if not ctx.can_list_all():
+    if ctx.can_list_all() is not None:
         orders = order_service.list(user_id=str(ctx.user.user_id), db=db)
     else:
         orders = order_service.list(db=db)

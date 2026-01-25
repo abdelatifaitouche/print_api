@@ -16,6 +16,7 @@ from app.schemas.order_schema import OrderCreate, OrderRead, OrderUpdate
 from app.services.base_service import BaseService
 from app.services.order_item_service import OrderItemService
 from app.utils.tasks import process_file_upload
+from app.schemas.user_schema import User
 
 
 class OrderService(BaseService[OrderModel, OrderCreate, OrderRead, OrderUpdate]):
@@ -91,13 +92,15 @@ class OrderService(BaseService[OrderModel, OrderCreate, OrderRead, OrderUpdate])
 
     @override
     def create(
-        self, db: Session, order_data: OrderCreate, user: dict, files
+        self, db: Session, order_data: OrderCreate, ctx: PermissionContext, files
     ) -> OrderRead | None:
         from app.schemas.company_schema import CompanyRead
         from app.services.company_service import CompanyService
 
         company_service = CompanyService()
-        company_data: CompanyRead = company_service.get_by_id(user["company_id"], db)
+        company_data: CompanyRead = company_service.get_by_id(
+            str(ctx.user.company_id), db
+        )
 
         if not company_data:
             raise ValueError("No company found with this id")
@@ -108,7 +111,7 @@ class OrderService(BaseService[OrderModel, OrderCreate, OrderRead, OrderUpdate])
         drive_folder: str = company_data.drive_folder_id
 
         try:
-            order = OrderModel(created_by=user["id"])
+            order = OrderModel(created_by=str(ctx.user.user_id))
             order_id = self.__add_to_db(order, db).id
 
             if order_id:

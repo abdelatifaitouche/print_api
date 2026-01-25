@@ -45,6 +45,7 @@ class CompanyService(
 
         return CompanyRead.from_orm(created_model)
 
+    """
     def get_by_id(self, company_id: str, db: Session) -> CompanyRead:
         company: CompanyModel = self.__repo.get_by_id(company_id, db)
 
@@ -52,6 +53,7 @@ class CompanyService(
             raise Exception("no company found")
 
         return CompanyRead.from_orm(company)
+    """
 
     def delete(self, company_id: str, db: Session) -> bool:
         company: CompanyModel = self.__repo.get_by_id(company_id, db)

@@ -5,31 +5,28 @@ from fastapi.exceptions import HTTPException
 from fastapi import status
 from app.enums.permissions import Permissions
 from app.enums.roles import Roles
-from app.auth.role_perms_map import ROLE_PERMISSION
+from app.schemas.user_schema import User
+from app.auth.jwt.jwt_service import JwtService
+from app.schemas.jwt_payload import JwtPayload
 
-class PrivateRoute:    
+
+class PrivateRoute:
     """
-        Checks whether a user is authenticated via jwt manager token validity
-            
-    """        
-    async def __call__(self , request : Request):   
+    Checks whether a user is authenticated via jwt manager token validity
+
+    """
+
+    async def __call__(self, request: Request) -> JwtPayload:
         token = request.cookies.get("access_token")
-        
-        if not token : 
+
+        if not token:
             raise HTTPException(
-                detail="Not authenticated",
-                status_code = status.HTTP_401_UNAUTHORIZED
+                detail="Not authenticated", status_code=status.HTTP_401_UNAUTHORIZED
             )
 
-        token_validity : bool = JwtManager().verify_token(token)
-        
-        if not token_validity : 
-            raise HTTPException(detail="UnValid token" , status_code = status.HTTP_401_UNAUTHORIZED)
-        
+        try:
+            payload: JwtPayload = JwtService.decode_token(token)
+            return payload
 
-        user_data :  dict = JwtManager().get_user_from_token(token)
-        
-        if not user_data : 
-            raise HTTPException(detail="Cannot get token data" , status_code=status.HTTP_401_UNAUTHORIZED)
-        
-        return user_data
+        except Exception as e:
+            raise HTTPException(detail=str(e), status_code=status.HTTP_401_UNAUTHORIZED)

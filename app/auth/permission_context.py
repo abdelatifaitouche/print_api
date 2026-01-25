@@ -1,39 +1,41 @@
-from app.enums.permissions import Permissions
-from app.enums.roles import Roles
 from app.auth.permission_service import PermissionService
-class PermissionContext : 
-    def __init__(self , user_id : str , role : Roles):
-        self.user_id : str = user_id
-        self.role : Roles = role
-        self.permissions : set[Roles] = PermissionService.get_permissions_for_role(role)
-    
-    def has_permission(self , permission : Permissions)->bool:
-        return True if permission in self.permissions else False
-    
-    def has_all_permissions(self , *permissions : Permissions)->bool:
-        """
-            this one might cause me some confusion later,
-            what's happening is am just checking if the user
-            has all the permissions in the permissions parameter that we passed
-
-            dont get angry at this, take a lil bit of time to read it (dont smoke)
-        """    
-        return all(permission in self.permissions for permission in permissions )
-            
-    def can_see_all(self):
-        """
-            Just checking if the user can list everything, or if he is an admin
-        """    
-        return True if Permissions.CAN_SEE_ALL in self.permissions or self.role == Roles.ADMIN else False
-
-    def get_ownership(self)->str:
-        """
-            checks if he can see all (which is for sure for an admin),
-            otherwise just return the user id to filter later 
-        """
-        return None if self.can_see_all() else self.user_id
-
-    def has_role(self , role : Roles):
-        return True if self.role == role else False
+from app.enums.permissions import Permissions
+from app.schemas.user_schema import User
+from app.schemas.jwt_payload import JwtPayload
 
 
+class PermissionContext:
+    def __init__(self, user: JwtPayload):
+        self.user = user
+        self.permissions: set[Permissions] = PermissionService.get_role_permissions(
+            self.user.role
+        )
+
+    def has_permission(self, permission):
+        if permission not in self.permissions:
+            return False
+        return True
+
+    def has_any_permission(self, *permissions: Permissions):
+        return any(perm in self.permissions for perm in permissions)
+
+    def can_list_all(self):
+        if Permissions.CAN_READ_ALL in self.permissions:
+            return None
+        return self.user.user_id
+
+    def __is_resource_owner(self, resource_owner_id: str) -> bool:
+        if self.user.user_id == resource_owner_id:
+            return True
+        return False
+
+    def can_access_resource(self, resource_owner_id):
+        if self.can_list_all() is not None:
+            return self.__is_resource_owner(resource_owner_id)
+        else:
+            return True
+
+    def is_memeber(self, org_id: str):
+        if self.can_list_all() is not None:
+            return self.user.company_id == org_id
+        return True

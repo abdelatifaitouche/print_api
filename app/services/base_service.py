@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from abc import ABC
 from app.execeptions.base import NoDataError
-
+from app.auth.permission_context import PermissionContext
 
 TCreateSchema = TypeVar("TCreateSchema", bound=BaseModel)
 TReadSchema = TypeVar("TReadSchema", bound=BaseModel)
@@ -22,8 +22,14 @@ class BaseService(ABC, Generic[TModel, TCreateSchema, TReadSchema, TUpdateSchema
     def __init__(self):
         self.repo = self.REPO_CLASS()
 
-    def list(self, db: Session) -> list[TReadSchema]:
-        data: list[TModel] = self.repo.list(db)
+    def list(self, db: Session, user_id: str | None = None) -> list[TReadSchema]:
+        filters = {}
+
+        if user_id:
+            filters["user_id"] = user_id
+        else:
+            filters["user_id"] = None
+        data: list[TModel] = self.repo.list(filters, db)
 
         if not data:
             raise NoDataError(

@@ -15,8 +15,16 @@ dependencies = [
     "google-auth-oauthlib>=1.2.2",
     "psycopg2>=2.9.11",
     "pydantic>=2.12.5",
+    "pyjwt>=2.10.1",
+    "pytest>=9.0.2",
     "python-dotenv>=1.2.1",
     "python-multipart>=0.0.21",
     "sqlalchemy>=2.0.44",
     "uvicorn>=0.38.0",
 ]
+
+[tool.basedpyright]  # Note: basedpyright, not pyright!
+typeCheckingMode = "off"  # or "basic"
+reportUninitializedInstanceVariable = false
+reportAttributeAccessIssue = false
+

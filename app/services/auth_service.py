@@ -5,6 +5,8 @@ from app.models.user import User as UserDB
 from app.utils.password_utils import encrypt_password, check_password
 from app.utils.jwt_utils import JwtManager
 from app.services.base_service import BaseService
+from app.auth.jwt.jwt_service import JwtService
+from app.schemas.jwt_payload import JwtPayload
 
 
 class AuthService(BaseService[UserDB, UserCreate, User, UserAdminUpdate]):
@@ -59,15 +61,15 @@ class AuthService(BaseService[UserDB, UserCreate, User, UserAdminUpdate]):
             now , based on the right data encode it and return its jwt 
         """
 
-        access_token: str = self.__jwt_manager.generate_token(
-            user_data={
-                "id": user.id,
-                "username": user.username,
-                "email": user.email,
-                "role": user.role,
-                "company_id": user.company_id,
-            }
+        payload: JwtPayload = JwtPayload(
+            user_id=user.id,
+            email=user.email,
+            company_id=user.company_id,
+            role=user.role,
+            username=user.username,
         )
+
+        access_token: str = JwtService.generate_access_token(payload)
 
         return access_token
 

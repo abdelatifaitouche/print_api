@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException, Form
+from fastapi import APIRouter, UploadFile, File, HTTPException, Form, status
 from app.schemas.order_schema import OrderCreate, OrderRead
 from app.config.database import get_db
 from fastapi import Depends
@@ -10,6 +10,9 @@ from app.utils.google_drive_manager import GoogleDriveManager
 from app.enums.permissions import Permissions
 from app.enums.roles import Roles
 import json
+from app.schemas.user_schema import User
+from app.auth.role_perms_map import ROLE_PERMISSION
+from app.auth.permissions_api import require_permission
 from app.auth.permission_context import PermissionContext
 
 order_endpoint = APIRouter()
@@ -18,29 +21,46 @@ order_service = OrderService()
 gdm = GoogleDriveManager()
 
 
-def user_context(user: dict = Depends(PrivateRoute())) -> PermissionContext:
-    permission_context = PermissionContext(user_id=user["id"], role=user["role"])
-    return permission_context
-
-
-@order_endpoint.get("/")
-def list_orders(db: Session = Depends(get_db), ctx_perms: dict = Depends(user_context)):
-    orders = order_service.list(ctx_perms, db)
+@order_endpoint.get("/", response_model=list[OrderRead])
+def list_orders(
+    db: Session = Depends(get_db),
+    ctx: PermissionContext = Depends(
+        require_permission(Permissions.CAN_READ_ALL, Permissions.CAN_READ_ORDER)
+    ),
+):
+    if not ctx.can_list_all():
+        orders = order_service.list(user_id=str(ctx.user.user_id), db=db)
+    else:
+        orders = order_service.list(db=db)
     return orders
 
 
 @order_endpoint.get("/user/{user_id}", response_model=List[OrderRead])
 def get_orders_by_user(
-    user_id: str, db: Session = Depends(get_db), user: dict = Depends(PrivateRoute())
+    user_id: str,
+    db: Session = Depends(get_db),
+    user: User = Depends(PrivateRoute()),
 ):
-    orders = order_service.list(db, user_id)
+    orders = order_service.list(user, db)
 
     return orders
 
 
 @order_endpoint.get("/{order_id}", response_model=OrderRead)
-def get_order_by_id(order_id: str, db: Session = Depends(get_db)):
+def get_order_by_id(
+    order_id: str,
+    db: Session = Depends(get_db),
+    ctx: PermissionContext = Depends(
+        require_permission(Permissions.CAN_READ_ALL, Permissions.CAN_READ_ORDER)
+    ),
+):
     order = order_service.get_by_id(order_id, db)
+
+    if not ctx.can_access_resource(order.created_by):
+        raise HTTPException(
+            detail="Can't access resource", status_code=status.HTTP_401_UNAUTHORIZED
+        )
+
     return order
 
 
@@ -49,8 +69,11 @@ def create_order(
     items_data: Annotated[str, Form(...)],
     files: List[UploadFile] = File(...),
     db: Session = Depends(get_db),
-    user: dict = Depends(PrivateRoute()),
+    ctx: PermissionContext = Depends(
+        require_permission(Permissions.CAN_CREATE_ALL, Permissions.CAN_CREATE_ORDER)
+    ),
 ) -> OrderRead:
+    print(ctx.user.company_id)
     try:
         raw_data = json.loads(items_data)
         order_data = OrderCreate(items=raw_data)
@@ -60,7 +83,7 @@ def create_order(
     if len(files) != len(order_data.items):
         raise HTTPException(422, "Number of file doesnt match the items")
 
-    order = order_service.create(db, order_data, user, files)
+    order = order_service.create(db, order_data, ctx, files)
     return order
 
 

@@ -14,46 +14,54 @@ from app.enums.permissions import Permissions
 
 raw_material_endpoints = APIRouter()
 
-raw_material_service = RawMaterialService()
+
+def get_service(db: Session = Depends(get_db)):
+    return RawMaterialService(db)
 
 
 @raw_material_endpoints.get("/", response_model=List[RawMaterialRead])
 def list_raw_materials(
-    db: Session = Depends(get_db),
+    raw_material_service: RawMaterialService = Depends(get_service),
     ctx: PermissionContext = Depends(
         require_permission(Permissions.CAN_READ_ALL),
     ),
 ):
-    data: List[RawMaterialRead] = raw_material_service.list(db=db)
+    data: List[RawMaterialRead] = raw_material_service.list()
     return data
 
 
 @raw_material_endpoints.post("/")
 def create_raw_material(
     data: RawMaterialCreate,
-    db: Session = Depends(get_db),
+    raw_material_service: RawMaterialService = Depends(get_service),
     ctx: PermissionContext = Depends(
         require_permission(Permissions.CAN_CREATE_ALL),
     ),
 ) -> RawMaterialRead:
-    material: RawMaterialRead = raw_material_service.create(data, db)
+    material: RawMaterialRead = raw_material_service.create(data)
     return material
 
 
 @raw_material_endpoints.get("/{material_id}")
-def get_raw_material_by_id(material_id: str, db: Session = Depends(get_db)):
-    material: RawMaterialRead = raw_material_service.get_by_id(material_id, db)
+def get_raw_material_by_id(
+    material_id: str, raw_material_service: RawMaterialService = Depends(get_service)
+):
+    material: RawMaterialRead = raw_material_service.get_by_id(material_id)
     return material
 
 
 @raw_material_endpoints.patch("/{material_id}/")
 def update_raw_material(
-    material_id: str, data: RawMaterialUpdate, db: Session = Depends(get_db)
+    material_id: str,
+    data: RawMaterialUpdate,
+    raw_material_service: RawMaterialService = Depends(get_service),
 ):
-    material: RawMaterialRead = raw_material_service.update(material_id, data, db)
+    material: RawMaterialRead = raw_material_service.update(material_id, data)
     return material
 
 
 @raw_material_endpoints.delete("/{material_id}/")
-def delete_raw_material(material_id: str, db: Session = Depends(get_db)):
-    return raw_material_service.delete(material_id, db)
+def delete_raw_material(
+    material_id: str, raw_material_service: RawMaterialService = Depends(get_service)
+):
+    return raw_material_service.delete(material_id)

@@ -21,7 +21,9 @@ from app.schemas.jwt_payload import JwtPayload
 
 auth_endpoints = APIRouter()
 
-auth_service = AuthService()
+
+def get_service(db: Session = Depends(get_db)):
+    return AuthService(db)
 
 
 @auth_endpoints.get("/")
@@ -32,20 +34,22 @@ def index():
 @auth_endpoints.post("/register_user/", response_model=User)
 def register_user(
     user_data: UserCreate,
-    db: Session = Depends(get_db),
+    auth_service=Depends(get_service),
     ctx: PermissionContext = Depends(
         require_permission(Permissions.CAN_CREATE_ALL),
     ),
 ):
-    user = auth_service.create(user_data, db)
+    user = auth_service.create(user_data)
     return user
 
 
 @auth_endpoints.post("/login/")
 def login_user(
-    login_data: UserLogin, response: Response, db: Session = Depends(get_db)
+    login_data: UserLogin,
+    response: Response,
+    auth_service: AuthService = Depends(get_service),
 ):
-    access_token = auth_service.login_user(login_data, db)
+    access_token = auth_service.login_user(login_data)
     response.set_cookie(
         key="access_token",
         value=access_token,
@@ -74,9 +78,11 @@ def logout_user(response: Response):
     "/users/{user_id}", response_model=User, status_code=status.HTTP_200_OK
 )
 def get_user_by_id(
-    user_id: str, db: Session = Depends(get_db), user: dict = Depends(PrivateRoute())
+    user_id: str,
+    auth_service=Depends(get_service),
+    user: dict = Depends(PrivateRoute()),
 ):
-    user: User = auth_service.get_user_by_id(user_id, db)
+    user: User = auth_service.get_user_by_id(user_id)
 
     return user
 
@@ -88,10 +94,10 @@ def get_user_profile(payload: JwtPayload | None = Depends(PrivateRoute())):
 
 @auth_endpoints.get("/users", response_model=List[User])
 def list_users(
-    db: Session = Depends(get_db),
+    auth_service=Depends(get_service),
     ctx: PermissionContext = Depends(require_permission(Permissions.CAN_READ_ALL)),
 ) -> List[User]:
-    users: List[User] = auth_service.list(db=db)
+    users: List[User] = auth_service.list()
     return users
 
 
@@ -101,8 +107,8 @@ def list_users(
 def admin_update_user(
     user_id: str,
     data: UserAdminUpdate,
-    db: Session = Depends(get_db),
+    auth_service=Depends(get_service),
     user: dict = Depends(PrivateRoute()),
 ):
-    user: User = auth_service.update(user_id, data, db)
+    user: User = auth_service.update(user_id, data)
     return user

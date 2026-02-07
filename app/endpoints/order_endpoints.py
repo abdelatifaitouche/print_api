@@ -16,45 +16,48 @@ from app.auth.permissions_api import require_permission
 from app.auth.permission_context import PermissionContext
 
 order_endpoint = APIRouter()
-order_service = OrderService()
 
 gdm = GoogleDriveManager()
 
 
+def get_service(db: Session = Depends(get_db)):
+    return OrderService(db)
+
+
 @order_endpoint.get("/", response_model=list[OrderRead])
 def list_orders(
-    db: Session = Depends(get_db),
+    order_service: OrderService = Depends(get_service),
     ctx: PermissionContext = Depends(
         require_permission(Permissions.CAN_READ_ALL, Permissions.CAN_READ_ORDER)
     ),
 ):
     if ctx.can_list_all() is not None:
-        orders = order_service.list(user_id=str(ctx.user.user_id), db=db)
+        orders = order_service.list(user_id=str(ctx.user.user_id))
     else:
-        orders = order_service.list(db=db)
+        orders = order_service.list()
     return orders
 
 
 @order_endpoint.get("/user/{user_id}", response_model=List[OrderRead])
 def get_orders_by_user(
     user_id: str,
-    db: Session = Depends(get_db),
     user: User = Depends(PrivateRoute()),
+    order_service: OrderService = Depends(get_service),
 ):
-    orders = order_service.list(user, db)
-
+    orders = order_service.list(user)
+    print(orders)
     return orders
 
 
 @order_endpoint.get("/{order_id}", response_model=OrderRead)
 def get_order_by_id(
     order_id: str,
-    db: Session = Depends(get_db),
+    order_service: OrderService = Depends(get_service),
     ctx: PermissionContext = Depends(
         require_permission(Permissions.CAN_READ_ALL, Permissions.CAN_READ_ORDER)
     ),
 ):
-    order = order_service.get_by_id(order_id, db)
+    order = order_service.get_by_id(order_id)
 
     if not ctx.can_access_resource(order.created_by):
         raise HTTPException(
@@ -68,7 +71,7 @@ def get_order_by_id(
 def create_order(
     items_data: Annotated[str, Form(...)],
     files: List[UploadFile] = File(...),
-    db: Session = Depends(get_db),
+    order_service: OrderService = Depends(get_service),
     ctx: PermissionContext = Depends(
         require_permission(Permissions.CAN_CREATE_ALL, Permissions.CAN_CREATE_ORDER)
     ),
@@ -83,11 +86,5 @@ def create_order(
     if len(files) != len(order_data.items):
         raise HTTPException(422, "Number of file doesnt match the items")
 
-    order = order_service.create(db, order_data, ctx, files)
+    order = order_service.create(order_data, ctx, files)
     return order
-
-
-@order_endpoint.get("/test_drive/")
-def test_drive():
-    folder_id = gdm.create_folder("testfolder")
-    return f"folder id {folder_id}"

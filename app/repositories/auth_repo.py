@@ -7,7 +7,7 @@ from app.repositories.base import BaseRepository
 class AuthRepository(BaseRepository["User"]):
     MODEL = User
 
-    def get_user_by_email(self, email: str, db: Session) -> User | None:
+    def get_user_by_email(self, email: str) -> User | None:
         stmt = select(User).where(User.email == email)
-        result = db.execute(stmt).scalar_one_or_none()
+        result = self.db.execute(stmt).scalar_one_or_none()
         return result

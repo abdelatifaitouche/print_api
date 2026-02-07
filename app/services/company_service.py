@@ -10,17 +10,11 @@ from app.utils.tasks import process_folder_creation
 class CompanyService(
     BaseService[CompanyModel, CompanyCreate, CompanyRead, CompanyUpdate]
 ):
-    repo = CompanyRepository()
+    REPO_CLASS = CompanyRepository
     READ_SCHEMA = CompanyRead
 
-    def __init__(self):
-        """
-        should add the company repo
-        """
-        self.__repo = CompanyRepository()
-
     def create(
-        self, company_data: CompanyCreate, db: Session, user_id: str | None = None
+        self, company_data: CompanyCreate, user_id: str | None = None
     ) -> CompanyRead:
         """
         FIRST CREATE THE FOLDER DRIVER
@@ -34,7 +28,7 @@ class CompanyService(
             raise Exception("please enter a valid email")
 
         model: CompanyModel = CompanyModel(**company_data.dict())
-        created_model: CompanyModel = self.__repo.create(model, db)
+        created_model: CompanyModel = self.__repo.create(model)
 
         if not created_model:
             raise Exception("Company was not created")
@@ -44,39 +38,3 @@ class CompanyService(
         )
 
         return CompanyRead.from_orm(created_model)
-
-    """
-    def get_by_id(self, company_id: str, db: Session) -> CompanyRead:
-        company: CompanyModel = self.__repo.get_by_id(company_id, db)
-
-        if not company:
-            raise Exception("no company found")
-
-        return CompanyRead.from_orm(company)
-    """
-
-    def delete(self, company_id: str, db: Session) -> bool:
-        company: CompanyModel = self.__repo.get_by_id(company_id, db)
-
-        if not company:
-            raise Exception("No Company Found")
-
-        return self.__repo.delete(company.id, db)
-
-    def update(self, company_id: str, data: CompanyUpdate, db: Session) -> CompanyRead:
-        company_model: CompanyModel = self.__repo.get_by_id(company_id, db)
-
-        """
-            validate the data first ??
-        """
-
-        updated_data: dict = data.dict(exclude_unset=True)
-
-        updated_model: CompanyModel = self.__repo.update(
-            company_model, updated_data, db
-        )
-
-        if not updated_model:
-            raise Exception("an error has occured while updating")
-
-        return CompanyRead.from_orm(updated_model)

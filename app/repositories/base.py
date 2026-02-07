@@ -9,21 +9,21 @@ T = TypeVar("T", bound=Base)
 class BaseRepository(Generic[T]):
     MODEL: Type[T] | None = None  # type: ignore
 
-    def __init__(self):
+    def __init__(self, db: Session):
+        self.db = db
         if self.MODEL is None:
             raise TypeError(f"{self.__class__.__name__} must set MODEL")
 
-    def create(self, data: T, db: Session) -> T:
+    def create(self, data: T) -> T:
         try:
-            db.add(data)
-            db.commit()
-            db.flush()
+            self.db.add(data)
+            self.db.commit()
             return data
         except Exception as e:
-            db.rollback()
+            self.db.rollback()
             raise e
 
-    def list(self, filters, db: Session) -> list[T]:
+    def list(self, filters) -> list[T]:
         stmt = select(self.MODEL)
 
         if filters["user_id"] is not None:
@@ -31,34 +31,34 @@ class BaseRepository(Generic[T]):
 
         stmt = stmt.order_by(self.MODEL.created_at.desc()).limit(10).offset(0)
 
-        result = db.execute(stmt).scalars().all()
+        result = self.db.execute(stmt).scalars().all()
 
         return result
 
-    def get_by_id(self, entity_id: str, db: Session) -> T:
+    def get_by_id(self, entity_id: str) -> T:
         stmt = select(self.MODEL).where(self.MODEL.id == entity_id)
-        result = db.execute(stmt).scalar_one_or_none()
+        result = self.db.execute(stmt).scalar_one_or_none()
 
         return result
 
-    def update(self, entity: T, data: dict, db: Session) -> T:
+    def update(self, entity: T, data: dict) -> T:
         try:
             for field, value in data.items():
                 setattr(entity, field, value)
 
-            db.commit()
-            db.refresh(entity)
+            self.db.commit()
+            self.db.refresh(entity)
             return entity
         except Exception as e:
-            db.rollback()
+            self.db.rollback()
             raise e
 
-    def delete(self, entity_id: str, db: Session) -> bool:
+    def delete(self, entity_id: str) -> bool:
         try:
             stmt = delete(self.MODEL).where(self.MODEL.id == entity_id)
-            result = db.execute(stmt)
-            db.commit()
+            result = self.db.execute(stmt)
+            self.db.commit()
             return result.rowcount > 0
         except Exception as e:
-            db.rollback()
+            self.db.rollback()
             raise e

@@ -14,16 +14,17 @@ class AuthService(BaseService[UserDB, UserCreate, User, UserAdminUpdate]):
     CREATE_SCHEMA = UserCreate
     UPDATE_SCHEMA = UserAdminUpdate
     DB_MODEL = UserDB
+    REPO_CLASS = AuthRepository
 
-    def __init__(self):
-        self.repo = AuthRepository()
+    def __init__(self, db: Session):
+        super().__init__(db=db)
         self.__jwt_manager = JwtManager()
 
-    def create(self, user_data: UserCreate, db: Session) -> User:
+    def create(self, user_data: UserCreate) -> User:
         if not user_data.email or not user_data.password:
             raise Exception("please provide a valid email or password")
 
-        if self.repo.get_user_by_email(user_data.email, db) is not None:
+        if self.repo.get_user_by_email(user_data.email) is not None:
             raise Exception("Email already exists")
 
         hashed_password = encrypt_password(user_data.password)
@@ -36,11 +37,11 @@ class AuthService(BaseService[UserDB, UserCreate, User, UserAdminUpdate]):
             company_id=user_data.company_id,
         )
 
-        user = self.repo.create(user_model, db)
+        user = self.repo.create(user_model)
 
         return User.from_orm(user)
 
-    def login_user(self, login_data: UserLogin, db: Session):
+    def login_user(self, login_data: UserLogin):
         """
         Takes the login data : email and password
         checks if a user with the provided email exists
@@ -49,7 +50,7 @@ class AuthService(BaseService[UserDB, UserCreate, User, UserAdminUpdate]):
 
         """
 
-        user: UserDB = self.repo.get_user_by_email(login_data.email, db)
+        user: UserDB = self.repo.get_user_by_email(login_data.email)
 
         if not user:
             raise Exception("email dosnt exists")
@@ -76,8 +77,8 @@ class AuthService(BaseService[UserDB, UserCreate, User, UserAdminUpdate]):
     def get_user_by_email(self):
         return
 
-    def get_user_by_id(self, user_id: str, db: Session) -> User:
-        user: User = self.repo.get_by_id(user_id, db)
+    def get_user_by_id(self, user_id: str) -> User:
+        user: User = self.repo.get_by_id(user_id)
 
         if not user:
             raise Exception("no user found")

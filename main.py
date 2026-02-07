@@ -25,9 +25,6 @@ app.add_middleware(
 
 
 app.include_router(order_endpoint, prefix=f"/api/{version}/orders")
-app.include_router(
-    order_items_endpoints, prefix=f"/api/{version}/orders/{{order_id}}/items"
-)
 app.include_router(auth_endpoints, prefix=f"/api/{version}/auth")
 app.include_router(order_item_endpoints, prefix=f"/api/{version}/items")
 app.include_router(company_endpoints, prefix=f"/api/{version}/company")

@@ -16,9 +16,9 @@ class ProductService(
     UPDATE_SCHEMA = ProductUpdate
 
     @override
-    def create(self, data: ProductCreate, db: Session) -> ProductRead:
+    def create(self, data: ProductCreate) -> ProductRead:
         product: ProductModel = self.repo.create(
-            ProductModel(**(data.model_dump(exclude={"raw_materials"}))), db
+            ProductModel(**(data.model_dump(exclude={"raw_materials"})))
         )
 
         if not product:
@@ -30,9 +30,9 @@ class ProductService(
                 raw_material_id=raw_material.raw_material_id,
                 quantity=raw_material.quantity,
             )
-            db.add(association)
+            self.db.add(association)
 
-        db.commit()
-        db.refresh(product)
+        self.db.commit()
+        self.db.refresh(product)
 
         return ProductRead.from_orm(product)

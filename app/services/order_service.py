@@ -25,9 +25,9 @@ class OrderService(BaseService[OrderModel, OrderCreate, OrderRead, OrderUpdate])
     REPO_CLASS = OrderRepository
     UPDATE_SCHEMA = OrderUpdate
 
-    def __init__(self):
-        super().__init__()
-        self.__order_item_service = OrderItemService()
+    def __init__(self, db: Session):
+        super().__init__(db=db)
+        self.__order_item_service = OrderItemService(db)
         self.UPLOAD_DIR = Path("/app/uploads")
         self.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -41,9 +41,9 @@ class OrderService(BaseService[OrderModel, OrderCreate, OrderRead, OrderUpdate])
         from app.schemas.product_schema import ProductRead
         from app.services.product_service import ProductService
 
-        product_service = ProductService()
+        product_service = ProductService(db)
 
-        product: Optional[ProductRead] = product_service.get_by_id(product_id, db)
+        product: Optional[ProductRead] = product_service.get_by_id(product_id)
 
         if product is None:
             raise Exception(f"Could not get the product with the id {product_id}")
@@ -92,15 +92,13 @@ class OrderService(BaseService[OrderModel, OrderCreate, OrderRead, OrderUpdate])
 
     @override
     def create(
-        self, db: Session, order_data: OrderCreate, ctx: PermissionContext, files
+        self, order_data: OrderCreate, ctx: PermissionContext, files
     ) -> OrderRead | None:
         from app.schemas.company_schema import CompanyRead
         from app.services.company_service import CompanyService
 
-        company_service = CompanyService()
-        company_data: CompanyRead = company_service.get_by_id(
-            str(ctx.user.company_id), db
-        )
+        company_service = CompanyService(self.db)
+        company_data: CompanyRead = company_service.get_by_id(str(ctx.user.company_id))
 
         if not company_data:
             raise ValueError("No company found with this id")
@@ -112,12 +110,12 @@ class OrderService(BaseService[OrderModel, OrderCreate, OrderRead, OrderUpdate])
 
         try:
             order = OrderModel(created_by=str(ctx.user.user_id))
-            order_id = self.__add_to_db(order, db).id
+            order_id = self.__add_to_db(order, self.db).id
 
             if order_id:
                 for item, file in zip(order_data.items, files):
                     # Create order item
-                    order_item = self.__order_item_create(order_id, item, file, db)
+                    order_item = self.__order_item_create(order_id, item, file, self.db)
 
                     # Process and save file
                     file_name, file_path = self.__process_file(file)
@@ -129,11 +127,11 @@ class OrderService(BaseService[OrderModel, OrderCreate, OrderRead, OrderUpdate])
                         order_item_id=order_item.id,
                         parent_drive_folder=str(drive_folder),
                     )
-                    uploaded_file_id = self.__add_to_db(uploaded_file, db).id
+                    uploaded_file_id = self.__add_to_db(uploaded_file, self.db).id
 
                     # CRITICAL: Commit here so Celery can find the record
-                    db.commit()
-                    db.refresh(uploaded_file)
+                    self.db.commit()
+                    self.db.refresh(uploaded_file)
 
                     # Dispatch Celery task - ensure ID is string
                     task = process_file_upload.delay(
@@ -143,13 +141,13 @@ class OrderService(BaseService[OrderModel, OrderCreate, OrderRead, OrderUpdate])
                     )
 
                 # Final commit for the order
-                db.commit()
-                db.refresh(order)
+                self.db.commit()
+                self.db.refresh(order)
 
                 return OrderRead.from_orm(order)
 
         except Exception as e:
-            db.rollback()
+            self.db.rollback()
 
             # Clean up any uploaded files on failure
             try:
@@ -159,15 +157,3 @@ class OrderService(BaseService[OrderModel, OrderCreate, OrderRead, OrderUpdate])
                 pass
 
             raise e
-
-    """
-    def get_by_id(self, db: Session, order_id: str) -> OrderRead:
-        order = self.__order_repo.get_by_id(order_id, db)
-
-        if not order:
-            raise HTTPException(
-                detail="Order doesnt exists", status_code=status.HTTP_400_BAD_REQUEST
-            )
-
-        return OrderRead.from_orm(order)
-    """

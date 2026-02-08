@@ -68,7 +68,7 @@ class BaseRepository(Generic[T]):
     def get_by_id(self, entity_id: str) -> T:
         try:
             stmt = select(self.MODEL).where(self.MODEL.id == entity_id)
-            result = self.db.__exit__ecute(stmt).scalar_one_or_none()
+            result = self.db.execute(stmt).scalar_one_or_none()
         except SQLAlchemyError as e:
             raise DatabaseError(
                 message=f"Failed to fetch {self.MODEL.__name__}",

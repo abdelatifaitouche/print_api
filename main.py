@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 from app.endpoints.order_endpoints import order_endpoint
 from app.endpoints.items_endpoints import order_items_endpoints
 from app.endpoints.auth_endpoints import auth_endpoints
@@ -8,10 +9,13 @@ from app.endpoints.company_endpoints import company_endpoints
 from app.endpoints.drive_endponts import drive_endpoints
 from app.endpoints.raw_material_endpoints import raw_material_endpoints
 from app.endpoints.product_endpoints import product_endpoints
+from app.execeptions.exceptions_handlers import register_exception_handlers
+
 
 version = "v1"
 
 app = FastAPI(version=version)
+register_exception_handlers(app)
 
 origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
 
@@ -31,8 +35,3 @@ app.include_router(company_endpoints, prefix=f"/api/{version}/company")
 app.include_router(drive_endpoints, prefix=f"/api/{version}/drive")
 app.include_router(raw_material_endpoints, prefix=f"/api/{version}/materials")
 app.include_router(product_endpoints, prefix=f"/api/{version}/products")
-
-
-@app.get("/")
-def home():
-    return "home routes"

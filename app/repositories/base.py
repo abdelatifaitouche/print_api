@@ -55,10 +55,14 @@ class BaseRepository(Generic[T]):
 
     def delete(self, entity_id: str) -> bool:
         try:
-            stmt = delete(self.MODEL).where(self.MODEL.id == entity_id)
-            result = self.db.execute(stmt)
-            self.db.commit()
-            return result.rowcount > 0
+            entity = self.db.get(self.MODEL, entity_id)
+
+            if entity:
+                self.db.delete(entity)
+                self.db.commit()
+                return True
+            else:
+                return False
         except Exception as e:
             self.db.rollback()
             raise e

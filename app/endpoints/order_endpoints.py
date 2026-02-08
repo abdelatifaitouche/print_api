@@ -88,3 +88,14 @@ def create_order(
 
     order = order_service.create(order_data, ctx, files)
     return order
+
+
+@order_endpoint.delete("/{order_id}")
+def delete_order(
+    order_id: str,
+    order_service: OrderService = Depends(get_service),
+    ctx: PermissionContext = Depends(require_permission(Permissions.CAN_DELETE_ALL)),
+):
+    order = order_service.delete(order_id)
+
+    return order

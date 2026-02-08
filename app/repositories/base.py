@@ -2,6 +2,8 @@ from typing import Type, TypeVar, Generic
 from sqlalchemy.orm import Session
 from sqlalchemy import select, delete
 from app.models.base import Base
+from app.execeptions.base import DatabaseError, ValidationError, AlreadyExistsError
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 
 T = TypeVar("T", bound=Base)
 
@@ -18,27 +20,60 @@ class BaseRepository(Generic[T]):
         try:
             self.db.add(data)
             self.db.commit()
+            self.db.refresh(data)
             return data
-        except Exception as e:
+        except IntegrityError as e:
             self.db.rollback()
-            raise e
+
+            if "unique constraint" in str(e.orig).lower():
+                raise AlreadyExistsError(
+                    message=f"{self.MODEL.__name__} already exists",
+                    details={"error": str(e.orig)},
+                )
+            elif "foreign key" in str(e.orig).lower():
+                raise ValidationError(
+                    message=f"Invalid Reference in {self.MODEL.__name__}",
+                    details={"error": str(e.orig)},
+                )
+
+            raise DatabaseError(
+                message=f"Failed to create {self.MODEL.__name__}",
+                details={"error": str(e.orig)},
+            )
+        except SQLAlchemyError as e:
+            self.db.rollback()
+            raise DatabaseError(
+                message=f"Failed to create {self.MODEL.__name__}",
+                details={"error": str(e)},
+            )
 
     def list(self, filters) -> list[T]:
-        stmt = select(self.MODEL)
+        try:
+            stmt = select(self.MODEL)
 
-        if filters["user_id"] is not None:
-            stmt = stmt.where(self.MODEL.created_by == filters["user_id"])
+            if filters["user_id"] is not None:
+                stmt = stmt.where(self.MODEL.created_by == filters["user_id"])
 
-        stmt = stmt.order_by(self.MODEL.created_at.desc()).limit(10).offset(0)
+            stmt = stmt.order_by(self.MODEL.created_at.desc()).limit(10).offset(0)
 
-        result = self.db.execute(stmt).scalars().all()
+            result = self.db.execute(stmt).scalars().all()
 
-        return result
+            return result
+        except SQLAlchemyError as e:
+            raise DatabaseError(
+                message=f"Failed to fetch {self.MODEL.__name__} list",
+                details={"error": str(e)},
+            )
 
     def get_by_id(self, entity_id: str) -> T:
-        stmt = select(self.MODEL).where(self.MODEL.id == entity_id)
-        result = self.db.execute(stmt).scalar_one_or_none()
-
+        try:
+            stmt = select(self.MODEL).where(self.MODEL.id == entity_id)
+            result = self.db.__exit__ecute(stmt).scalar_one_or_none()
+        except SQLAlchemyError as e:
+            raise DatabaseError(
+                message=f"Failed to fetch {self.MODEL.__name__}",
+                details={"entity_id": entity_id, "error": str(e)},
+            )
         return result
 
     def update(self, entity: T, data: dict) -> T:
@@ -63,6 +98,22 @@ class BaseRepository(Generic[T]):
                 return True
             else:
                 return False
-        except Exception as e:
+        except IntegrityError as e:
             self.db.rollback()
-            raise e
+            raise ValidationError(
+                message=f"Cannot delete {self.MODEL.__name__}",
+                details={
+                    "entity_id": entity_id,
+                    "error": str(e.orig),
+                },
+            )
+
+        except SQLAlchemyError as e:
+            self.db.rollback()
+            raise DatabaseError(
+                message=f"Failed to delete {self.MODEL.__name__}",
+                details={
+                    "entity_id": entity_id,
+                    "error": str(e),
+                },
+            )

@@ -16,22 +16,8 @@ class CompanyService(
     def create(
         self, company_data: CompanyCreate, user_id: str | None = None
     ) -> CompanyRead:
-        """
-        FIRST CREATE THE FOLDER DRIVER
-        """
-
-        if not company_data.name:
-            raise Exception("Company name must be valid")
-
-        if not company_data.email:
-            # include some way to verify the email validity
-            raise Exception("please enter a valid email")
-
         model: CompanyModel = CompanyModel(**company_data.dict())
-        created_model: CompanyModel = self.__repo.create(model)
-
-        if not created_model:
-            raise Exception("Company was not created")
+        created_model: CompanyModel = self.repo.create(model)
 
         process_folder_creation.delay(
             company_id=created_model.id, folder_name=company_data.name + "Drive"

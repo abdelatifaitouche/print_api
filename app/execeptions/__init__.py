@@ -1,1 +1,1 @@
-from .base import NoDataError
+from .base import DatabaseError, NotFoundError

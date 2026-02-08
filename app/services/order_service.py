@@ -17,6 +17,7 @@ from app.services.base_service import BaseService
 from app.services.order_item_service import OrderItemService
 from app.utils.tasks import process_file_upload
 from app.schemas.user_schema import User
+from app.execeptions.base import ValidationError
 
 
 class OrderService(BaseService[OrderModel, OrderCreate, OrderRead, OrderUpdate]):
@@ -45,17 +46,14 @@ class OrderService(BaseService[OrderModel, OrderCreate, OrderRead, OrderUpdate])
 
         product: Optional[ProductRead] = product_service.get_by_id(product_id)
 
-        if product is None:
-            raise Exception(f"Could not get the product with the id {product_id}")
-
-        if product.base_price <= 0 or quantity <= 0:
-            raise Exception("Invalid Data while calculating the item price")
-
         return product.base_price * quantity
 
     def __order_item_create(self, order_id: str, order_item, file, db: Session):
         if not order_item.quantity or order_item.quantity <= 0:
-            raise Exception("Invalid Data for Order Item")
+            raise ValidationError(
+                message="Invalid data for order item",
+                details={"item": order_item.id, "error": "Invalid Quantity"},
+            )
 
         item_price: float = self.__calculate_item_price(
             order_item.product_id, order_item.quantity, db
@@ -100,11 +98,8 @@ class OrderService(BaseService[OrderModel, OrderCreate, OrderRead, OrderUpdate])
         company_service = CompanyService(self.db)
         company_data: CompanyRead = company_service.get_by_id(str(ctx.user.company_id))
 
-        if not company_data:
-            raise ValueError("No company found with this id")
-
         if not company_data.drive_folder_id or company_data.folder_status != "CREATED":
-            raise Exception("Folder blocked for this company")
+            raise ValidationError(message=f"Drive Error")
 
         drive_folder: str = company_data.drive_folder_id
 

@@ -3,7 +3,7 @@ from app.repositories.base import BaseRepository
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from abc import ABC
-from app.execeptions.base import NoDataError
+from app.execeptions.base import NotFoundError
 from app.auth.permission_context import PermissionContext
 
 TCreateSchema = TypeVar("TCreateSchema", bound=BaseModel)
@@ -32,46 +32,38 @@ class BaseService(ABC, Generic[TModel, TCreateSchema, TReadSchema, TUpdateSchema
             filters["user_id"] = None
         data: list[TModel] = self.repo.list(filters)
 
-        if not data:
-            raise NoDataError(
-                service=self.__class__.__name__, message="No Records found"
-            )
-
         return [self.READ_SCHEMA.from_orm(item) for item in data]
 
     def create(self, data: TCreateSchema) -> TReadSchema:
-        if not data:
-            raise NoDataError(
-                serivce=self.__class__.__name__, message="No Data in the service"
-            )
         data: TModel = self.repo.create(self.DB_MODEL(**data.dict()))
 
         return self.READ_SCHEMA.from_orm(data)
 
     def get_by_id(self, data_id: str) -> TReadSchema:
-        if not data_id:
-            raise NoDataError(service=self.__class__.__name__, message="No Data")
         data: TModel = self.repo.get_by_id(data_id)
 
-        if data is None:
-            raise NoDataError(service=self.__class__.__name__, message="No Data Found")
+        if not data:
+            raise NotFoundError(
+                message=f"{self.repo.MODEL.__name__} not found",
+                details={"entity_id": data_id},
+            )
 
         return self.READ_SCHEMA.from_orm(data)
 
     def update(self, data_id: str, data: TUpdateSchema) -> TReadSchema:
-        model: TModel = self.repo.get_by_id(data_id)
-
-        if model is None:
-            raise NoDataError(service=self.__class__.__name__, message="No Data found")
+        model: TModel = self.get_by_id(data_id)
 
         updated_model: TModel = self.repo.update(model, (data.dict(exclude_unset=True)))
 
         return self.READ_SCHEMA.from_orm(updated_model)
 
     def delete(self, data_id: str) -> bool:
-        model: TModel = self.repo.get_by_id(data_id)
+        deleted = self.repo.delete(data_id)
 
-        if not model:
-            raise NoDataError(service=self.__class__.__name__, message="No Data Found")
+        if not deleted:
+            raise NotFoundError(
+                message=f"{self.repo.MODEL.__name__} not found",
+                details={"entity_id": data_id},
+            )
 
-        return self.repo.delete(model.id)
+        return True

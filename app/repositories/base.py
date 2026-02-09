@@ -1,6 +1,6 @@
 from typing import Type, TypeVar, Generic
 from sqlalchemy.orm import Session
-from sqlalchemy import select, delete
+from sqlalchemy import select
 from app.models.base import Base
 from app.execeptions.base import DatabaseError, ValidationError, AlreadyExistsError
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError

@@ -51,7 +51,7 @@ class BaseService(ABC, Generic[TModel, TCreateSchema, TReadSchema, TUpdateSchema
         return self.READ_SCHEMA.from_orm(data)
 
     def update(self, data_id: str, data: TUpdateSchema) -> TReadSchema:
-        model: TModel = self.get_by_id(data_id)
+        model: TModel = self.repo.get_by_id(data_id)
 
         updated_model: TModel = self.repo.update(model, (data.dict(exclude_unset=True)))
 

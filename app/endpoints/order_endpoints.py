@@ -6,7 +6,6 @@ from app.services.order_service import OrderService
 from sqlalchemy.orm import Session
 from typing import List, Annotated
 from app.utils.private_route import PrivateRoute
-from app.utils.google_drive_manager import GoogleDriveManager
 from app.enums.permissions import Permissions
 from app.enums.roles import Roles
 import json
@@ -16,8 +15,6 @@ from app.auth.permissions_api import require_permission
 from app.auth.permission_context import PermissionContext
 
 order_endpoint = APIRouter()
-
-gdm = GoogleDriveManager()
 
 
 def get_service(db: Session = Depends(get_db)):
@@ -45,7 +42,6 @@ def get_orders_by_user(
     order_service: OrderService = Depends(get_service),
 ):
     orders = order_service.list(user)
-    print(orders)
     return orders
 
 

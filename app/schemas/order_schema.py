@@ -9,7 +9,7 @@ from app.enums.order_enums import OrderStatus
 class OrderRead(BaseModel):
     id: UUID
     order_number: str
-    order_price: int | None = None
+    order_price: float | None = None
     status: str
     created_at: datetime
     updated_at: datetime

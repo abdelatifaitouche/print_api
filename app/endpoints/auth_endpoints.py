@@ -110,5 +110,5 @@ def admin_update_user(
     auth_service=Depends(get_service),
     user: dict = Depends(PrivateRoute()),
 ):
-    user: User = auth_service.update(user_id, data)
-    return user
+    updated_user: UserAdminUpdate = auth_service.update(user_id, data)
+    return updated_user

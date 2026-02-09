@@ -103,15 +103,18 @@ class OrderService(BaseService[OrderModel, OrderCreate, OrderRead, OrderUpdate])
 
         drive_folder: str = company_data.drive_folder_id
 
+        order_price: float = 0.0
+
         try:
             order = OrderModel(created_by=str(ctx.user.user_id))
-            order_id = self.__add_to_db(order, self.db).id
+            order = self.__add_to_db(order, self.db)
 
-            if order_id:
+            if order:
                 for item, file in zip(order_data.items, files):
                     # Create order item
-                    order_item = self.__order_item_create(order_id, item, file, self.db)
+                    order_item = self.__order_item_create(order.id, item, file, self.db)
 
+                    order_price += order_item.item_price
                     # Process and save file
                     file_name, file_path = self.__process_file(file)
 
@@ -136,6 +139,8 @@ class OrderService(BaseService[OrderModel, OrderCreate, OrderRead, OrderUpdate])
                     )
 
                 # Final commit for the order
+                order.order_price = order_price
+
                 self.db.commit()
                 self.db.refresh(order)
 

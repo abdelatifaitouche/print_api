@@ -86,7 +86,7 @@ def create_order(
     return order
 
 
-@order_endpoint.delete("/{order_id}")
+@order_endpoint.delete("/{order_id}/")
 def delete_order(
     order_id: str,
     order_service: OrderService = Depends(get_service),

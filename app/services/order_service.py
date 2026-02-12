@@ -17,7 +17,8 @@ from app.services.base_service import BaseService
 from app.services.order_item_service import OrderItemService
 from app.utils.tasks import process_file_upload
 from app.schemas.user_schema import User
-from app.execeptions.base import ValidationError
+from app.execeptions.base import NotFoundError, ValidationError
+from app.enums.order_enums import OrderStatus
 
 
 class OrderService(BaseService[OrderModel, OrderCreate, OrderRead, OrderUpdate]):
@@ -31,6 +32,21 @@ class OrderService(BaseService[OrderModel, OrderCreate, OrderRead, OrderUpdate])
         self.__order_item_service = OrderItemService(db)
         self.UPLOAD_DIR = Path("/app/uploads")
         self.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+    def accept_order(self, order_id: str) -> OrderRead:
+        order: OrderModel = self.repo.get_by_id(order_id)
+
+        if not order:
+            raise NotFoundError(message="Order Not Found")
+
+        if order.status != OrderStatus.PENDING.value.lower():
+            raise ValidationError(message="Cannot Accept Order status is not Pending")
+
+        updated_order: OrderUpdate = OrderUpdate(
+            status=OrderStatus.ACCEPTED.value.lower()
+        )
+
+        return super().update(order_id, updated_order)
 
     def __add_to_db(self, model, db: Session):
         db.add(model)

@@ -4,6 +4,7 @@ from uuid import UUID
 from .order_item_schema import OrderItemRead, OrderItemCreate, OrderItemBase
 from typing import List
 from app.enums.order_enums import OrderStatus
+from app.schemas.user_schema import User
 
 
 class OrderRead(BaseModel):
@@ -19,7 +20,7 @@ class OrderRead(BaseModel):
 
 
 class OrderUpdate(BaseModel):
-    order_number: str
+    status: str
 
 
 class OrderCreate(BaseModel):

@@ -26,3 +26,6 @@ class OrderItemService(
         order = self.__order_item_repo.create(order_db, db)
 
         return OrderItemRead.from_orm(order)
+
+    def transition(self, item_id: str):
+        return

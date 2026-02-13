@@ -34,10 +34,11 @@ class OrderService(BaseService[OrderModel, OrderCreate, OrderRead, OrderUpdate])
         self.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
     def accept_order(self, order_id: str) -> OrderRead:
-        order: OrderModel = self.repo.get_by_id(order_id)
+        from app.services.order_item_service import OrderItemService
+        from app.schemas.order_item_schema import OrderItemUpdate
+        from app.enums.order_items_status import OrderItemStatus
 
-        if not order:
-            raise NotFoundError(message="Order Not Found")
+        order: OrderModel = self.repo.get_by_id(order_id)
 
         if order.status != OrderStatus.PENDING.value.lower():
             raise ValidationError(message="Cannot Accept Order status is not Pending")
@@ -45,6 +46,33 @@ class OrderService(BaseService[OrderModel, OrderCreate, OrderRead, OrderUpdate])
         updated_order: OrderUpdate = OrderUpdate(
             status=OrderStatus.ACCEPTED.value.lower()
         )
+
+        item_service: OrderItemService = OrderItemService(self.db)
+
+        for item in order.items:
+            item_service.update(
+                item.id, OrderItemUpdate(status=OrderItemStatus.WAIT_FOR_PROCESSING)
+            )
+        return super().update(order_id, updated_order)
+
+    def reject_order(self, order_id: str) -> OrderRead:
+        from app.services.order_item_service import OrderItemService
+        from app.schemas.order_item_schema import OrderItemUpdate
+        from app.enums.order_items_status import OrderItemStatus
+
+        order: OrderModel = self.repo.get_by_id(order_id)
+
+        if order.status != OrderStatus.PENDING.value.lower():
+            raise ValidationError(message="Cannot reject order")
+
+        updated_order: OrderUpdate = OrderUpdate(status=OrderStatus.REJECTED)
+
+        item_service: OrderItemService = OrderItemService(self.db)
+
+        for item in order.items:
+            item_service.update(
+                item.id, OrderItemUpdate(status=OrderItemStatus.REJECTED)
+            )
 
         return super().update(order_id, updated_order)
 

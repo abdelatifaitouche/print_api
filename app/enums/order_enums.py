@@ -13,7 +13,3 @@ class OrderStatus(StrEnum):
     FINISHED = "FINISHED"
     CANCELLED = "CANCELLED"
     REJECTED = "REJECTED"
-
-
-class OrderItemStatus(StrEnum):
-    pass

@@ -38,3 +38,8 @@ def update_item(
     updated = service.update(item_id, data)
 
     return updated
+
+
+@order_items_endpoints.patch("/{item_id}/next_stage/")
+def get_next_stage(item_id: str, service: OrderItemService = Depends(get_service)):
+    return service.transition(item_id)

@@ -97,10 +97,15 @@ def delete_order(
     return order
 
 
-@order_endpoint.patch("/{order_id}/", response_model=OrderRead)
+@order_endpoint.patch("/{order_id}/accept/", response_model=OrderRead)
 def accept_order(
     order_id: str,
     service: OrderService = Depends(get_service),
     ctx: PermissionContext = Depends(require_permission(Permissions.CAN_UPDATE_ALL)),
 ):
     return service.accept_order(order_id)
+
+
+@order_endpoint.patch("/{order_id}/reject/", response_model=OrderRead)
+def reject_order(order_id: str, service: OrderService = Depends(get_service)):
+    return service.reject_order(order_id)

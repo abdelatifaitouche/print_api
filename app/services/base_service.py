@@ -5,6 +5,9 @@ from sqlalchemy.orm import Session
 from abc import ABC
 from app.execeptions.base import NotFoundError
 from app.auth.permission_context import PermissionContext
+from app.schemas.filters import Filters
+from app.schemas.pagination import Pagination
+from app.filters.base_filters import BaseFilters
 
 TCreateSchema = TypeVar("TCreateSchema", bound=BaseModel)
 TReadSchema = TypeVar("TReadSchema", bound=BaseModel)
@@ -23,16 +26,14 @@ class BaseService(ABC, Generic[TModel, TCreateSchema, TReadSchema, TUpdateSchema
         self.db = db
         self.repo = self.REPO_CLASS(db)
 
-    def list(self, user_id: str | None = None) -> list[TReadSchema]:
-        filters = {}
+    def list(
+        self,
+        filters: BaseFilters | None = None,
+        pagination: Pagination | None = None,
+    ) -> list[TReadSchema]:
+        data, total_items = self.repo.list(filters=filters, pagination=pagination)
 
-        if user_id:
-            filters["user_id"] = user_id
-        else:
-            filters["user_id"] = None
-        data: list[TModel] = self.repo.list(filters)
-
-        return [self.READ_SCHEMA.from_orm(item) for item in data]
+        return [self.READ_SCHEMA.from_orm(item) for item in data], total_items
 
     def create(self, data: TCreateSchema) -> TReadSchema:
         data: TModel = self.repo.create(self.DB_MODEL(**data.dict()))

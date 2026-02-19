@@ -20,6 +20,18 @@ class OrderModel(Base):
         String, ForeignKey("users.id"), nullable=True
     )
 
+    creator: Mapped["User"] = relationship(
+        back_populates="created_orders", foreign_keys=[created_by]
+    )
+
+    company_id: Mapped[str] = mapped_column(
+        String, ForeignKey("companies.id"), nullable=True
+    )
+
+    company: Mapped["CompanyModel"] = relationship(
+        back_populates="company_orders", foreign_keys=[company_id]
+    )
+
     items: Mapped[list["OrderItem"]] = relationship(
         back_populates="order", cascade="all, delete-orphan"
     )

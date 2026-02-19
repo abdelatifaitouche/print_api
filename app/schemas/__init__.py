@@ -1,4 +1,5 @@
 from .order_schema import OrderCreate, OrderRead, OrderUpdate
+from .pagination import Pagination
 from .order_item_schema import OrderItemRead, OrderItemCreate, OrderItemUpdate
 from .user_schema import UserCreate, User, UserLogin, UserAdminUpdate, UserContext
 from .company_schema import CompanyBase, CompanyRead, CompanyCreate, CompanyUpdate
@@ -13,3 +14,4 @@ from .product_schema import (
 )
 from .uploadedfile_schema import UploadedFileRead
 from .jwt_payload import JwtPayload
+from .filters import Filters

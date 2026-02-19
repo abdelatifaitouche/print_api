@@ -11,6 +11,8 @@ from app.schemas.product_schema import (
 from typing import List
 from app.auth.permission_context import PermissionContext
 from app.auth.permissions_api import require_permission
+from app.filters.base_filters import BaseFilters
+from app.schemas.pagination import Pagination
 
 product_endpoints = APIRouter()
 
@@ -26,9 +28,15 @@ def create_product(
     return product_service.create(data)
 
 
-@product_endpoints.get("/", response_model=List[ProductRead])
-def list_products(product_service: ProductService = Depends(get_service)):
-    return product_service.list()
+@product_endpoints.get("/")
+def list_products(
+    filters: BaseFilters | None = Depends(BaseFilters),
+    pagination: Pagination | None = Depends(Pagination),
+    product_service: ProductService = Depends(get_service),
+):
+    result, total_items = product_service.list(filters, pagination)
+
+    return result, total_items
 
 
 @product_endpoints.get("/product/{product_id}/", response_model=ProductLightRead)

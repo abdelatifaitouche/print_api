@@ -113,14 +113,10 @@ class OrderService(BaseService[OrderModel, OrderCreate, OrderRead, OrderUpdate])
         return self.__add_to_db(order_item_db, db)
 
     def __process_file(self, file):
-        """
-        generate a unique file name and create the file path
-        """
         file_name = f"{uuid.uuid4()}_{file.filename}"
         file_path = self.UPLOAD_DIR / file_name
 
         try:
-            # this is not good, gotta make it async using aiofiles
             with file_path.open("wb") as buffer:
                 shutil.copyfileobj(file.file, buffer)
         except Exception as e:
@@ -150,7 +146,9 @@ class OrderService(BaseService[OrderModel, OrderCreate, OrderRead, OrderUpdate])
         order_price: float = 0.0
 
         try:
-            order = OrderModel(created_by=str(ctx.user.user_id))
+            order = OrderModel(
+                created_by=str(ctx.user.user_id), company_id=str(ctx.user.company_id)
+            )
             order = self.__add_to_db(order, self.db)
 
             if order:
@@ -201,3 +199,6 @@ class OrderService(BaseService[OrderModel, OrderCreate, OrderRead, OrderUpdate])
                 pass
 
             raise e
+
+        def get_orders_by_company(company_id: str):
+            return

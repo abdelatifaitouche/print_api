@@ -42,3 +42,9 @@ def list_files_per_folder(
 def get_storage(gdm: GoogleDriveManager = Depends(get_drive_service)):
     storage = gdm.get_storage_data()
     return storage
+
+
+@drive_endpoints.post("/{file_id}/download/")
+def download_file(file_id: str, gdm: GoogleDriveManager = Depends(get_drive_service)):
+    link = gdm.create_public_link(file_id)
+    return link

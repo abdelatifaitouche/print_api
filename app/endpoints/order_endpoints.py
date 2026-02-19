@@ -13,6 +13,8 @@ from app.schemas.user_schema import User
 from app.auth.role_perms_map import ROLE_PERMISSION
 from app.auth.permissions_api import require_permission
 from app.auth.permission_context import PermissionContext
+from app.schemas.pagination import Pagination
+from app.filters.order_filters import OrderFilters
 
 order_endpoint = APIRouter()
 
@@ -21,18 +23,21 @@ def get_service(db: Session = Depends(get_db)):
     return OrderService(db)
 
 
-@order_endpoint.get("/", response_model=list[OrderRead])
+@order_endpoint.get("/")
 def list_orders(
+    filters: OrderFilters | None = Depends(OrderFilters),
+    pagination: Pagination | None = Depends(Pagination),
     order_service: OrderService = Depends(get_service),
     ctx: PermissionContext = Depends(
         require_permission(Permissions.CAN_READ_ALL, Permissions.CAN_READ_ORDER)
     ),
 ):
     if ctx.can_list_all() is not None:
-        orders = order_service.list(user_id=str(ctx.user.user_id))
+        filters.user_id = str(ctx.user.user_id)
+        orders, total_orders = order_service.list(filters, pagination)
     else:
-        orders = order_service.list()
-    return orders
+        orders, total_orders = order_service.list(filters, pagination)
+    return orders, total_orders
 
 
 @order_endpoint.get("/user/{user_id}", response_model=List[OrderRead])

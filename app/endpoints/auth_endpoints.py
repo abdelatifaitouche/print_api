@@ -70,10 +70,6 @@ def logout_user(response: Response):
     return "loggedout"
 
 
-# get user profile (user_data)
-# get all users (only for the admin)
-
-
 @auth_endpoints.get(
     "/users/{user_id}", response_model=User, status_code=status.HTTP_200_OK
 )

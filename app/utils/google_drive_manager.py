@@ -163,3 +163,19 @@ class GoogleDriveManager:
         except Exception as e:
             print(f"Erreur quota: {e}")
             return {}
+
+    def create_public_link(self, file_id: str):
+        if not file_id:
+            return None
+
+        permissions = {"type": "anyone", "role": "reader"}
+
+        self.service.permissions().create(fileId=file_id, body=permissions).execute()
+
+        file = (
+            self.service.files()
+            .get(fileId=file_id, fields="webViewLink,webContentLink")
+            .execute()
+        )
+
+        return file.get("webContentLink")

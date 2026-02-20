@@ -23,7 +23,7 @@ def get_service(db: Session = Depends(get_db)):
     return OrderService(db)
 
 
-@order_endpoint.get("/")
+@order_endpoint.get("")
 def list_orders(
     filters: OrderFilters | None = Depends(OrderFilters),
     pagination: Pagination | None = Depends(Pagination),

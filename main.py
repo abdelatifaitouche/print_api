@@ -14,7 +14,7 @@ from app.execeptions.exceptions_handlers import register_exception_handlers
 
 version = "v1"
 
-app = FastAPI(version=version)
+app = FastAPI(version=version, redirect_slashes=False)
 register_exception_handlers(app)
 
 origins = ["http://localhost:5173", "http://127.0.0.1:5173"]

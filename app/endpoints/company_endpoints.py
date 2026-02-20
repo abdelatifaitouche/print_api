@@ -10,7 +10,8 @@ from app.enums.roles import Roles
 from app.enums.permissions import Permissions
 from app.auth.permission_context import PermissionContext
 from app.auth.permissions_api import require_permission
-
+from app.filters.base_filters import BaseFilters
+from app.schemas.pagination import Pagination
 
 company_endpoints = APIRouter()
 
@@ -48,10 +49,12 @@ def create_company(
 
 @company_endpoints.get("/", response_model=List[CompanyRead])
 def list_companies(
+    filters: BaseFilters | None = Depends(BaseFilters),
+    pagination: Pagination | None = Depends(Pagination),
     company_service: CompanyService = Depends(get_service),
     ctx: PermissionContext = Depends(require_permission(Permissions.CAN_READ_ALL)),
 ) -> List[CompanyRead]:
-    companies: List[CompanyRead] = company_service.list()
+    companies: List[CompanyRead] = company_service.list(filters, pagination)
 
     return companies
 

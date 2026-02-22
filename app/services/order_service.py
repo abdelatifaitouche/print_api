@@ -40,12 +40,13 @@ class OrderService(BaseService[OrderModel, OrderCreate, OrderRead, OrderUpdate])
 
         order: OrderModel = self.repo.get_by_id(order_id)
 
-        if order.status != OrderStatus.PENDING.value.lower():
+        if (
+            order.status != OrderStatus.PENDING.value
+            or order.status == OrderStatus.ACCEPTED
+        ):
             raise ValidationError(message="Cannot Accept Order status is not Pending")
 
-        updated_order: OrderUpdate = OrderUpdate(
-            status=OrderStatus.ACCEPTED.value.lower()
-        )
+        updated_order: OrderUpdate = OrderUpdate(status=OrderStatus.ACCEPTED)
 
         item_service: OrderItemService = OrderItemService(self.db)
 
@@ -62,7 +63,7 @@ class OrderService(BaseService[OrderModel, OrderCreate, OrderRead, OrderUpdate])
 
         order: OrderModel = self.repo.get_by_id(order_id)
 
-        if order.status != OrderStatus.PENDING.value.lower():
+        if order.status != OrderStatus.PENDING.value:
             raise ValidationError(message="Cannot reject order")
 
         updated_order: OrderUpdate = OrderUpdate(status=OrderStatus.REJECTED)
@@ -200,5 +201,5 @@ class OrderService(BaseService[OrderModel, OrderCreate, OrderRead, OrderUpdate])
 
             raise e
 
-        def get_orders_by_company(company_id: str):
+        def get_orders_stat_by_company(company_id: str):
             return

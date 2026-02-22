@@ -40,6 +40,11 @@ def update_item(
     return updated
 
 
+@order_items_endpoints.patch("/{item_id}/pay/")
+def pay_item(item_id: str, service: OrderItemService = Depends(get_service)):
+    return service.pay_item(item_id)
+
+
 @order_items_endpoints.patch("/{item_id}/next_stage/")
 def get_next_stage(item_id: str, service: OrderItemService = Depends(get_service)):
     return service.transition(item_id)

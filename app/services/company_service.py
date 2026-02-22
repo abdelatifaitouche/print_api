@@ -12,6 +12,9 @@ class CompanyService(
 ):
     REPO_CLASS = CompanyRepository
     READ_SCHEMA = CompanyRead
+    CREATE_SCHEMA = CompanyCreate
+    UPDATE_SCHEMA = CompanyUpdate
+    DB_MODEL = CompanyModel
 
     def create(
         self, company_data: CompanyCreate, user_id: str | None = None

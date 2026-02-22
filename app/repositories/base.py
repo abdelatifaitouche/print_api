@@ -65,10 +65,6 @@ class BaseRepository(Generic[T]):
             if filters:
                 stmt = filters.apply(stmt, self.MODEL)
 
-            """
-            if filters["user_id"] is not None:
-                stmt = stmt.where(self.MODEL.created_by == filters["user_id"])
-            """
             count_stmt = select(func.count()).select_from(stmt.subquery())
 
             total_items = self.db.scalar(count_stmt)

@@ -47,16 +47,18 @@ def create_company(
     return company
 
 
-@company_endpoints.get("/", response_model=List[CompanyRead])
+@company_endpoints.get("")
 def list_companies(
     filters: BaseFilters | None = Depends(BaseFilters),
     pagination: Pagination | None = Depends(Pagination),
     company_service: CompanyService = Depends(get_service),
     ctx: PermissionContext = Depends(require_permission(Permissions.CAN_READ_ALL)),
-) -> List[CompanyRead]:
-    companies: List[CompanyRead] = company_service.list(filters, pagination)
+):
+    companies, total_companies = company_service.list(
+        filters=filters, pagination=pagination
+    )
 
-    return companies
+    return companies, total_companies
 
 
 @company_endpoints.patch("/{company_id}/", response_model=CompanyRead)
@@ -80,3 +82,11 @@ def delete_company(
         return "not delete"
 
     return "deleted"
+
+
+@company_endpoints.get("/{company_id}/stats/")
+def get_company_stats(
+    company_id: str,
+    service: CompanyService = Depends(get_service),
+):
+    return

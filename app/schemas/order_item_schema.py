@@ -26,7 +26,7 @@ class OrderItemRead(BaseModel):
     item_number: str
     item_price: float
     product: ProductLightRead
-    status: OrderItemStatus = OrderItemStatus.PENDING
+    status: OrderItemStatus | None = None
     quantity: int
     file: UploadedFileRead = None
     model_config = {"from_attributes": True}

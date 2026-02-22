@@ -114,3 +114,11 @@ def accept_order(
 @order_endpoint.patch("/{order_id}/reject/", response_model=OrderRead)
 def reject_order(order_id: str, service: OrderService = Depends(get_service)):
     return service.reject_order(order_id)
+
+
+@order_endpoint.get("/{company_id}/orders/stats/")
+def order_stats_by_company(
+    company_id: str,
+    service: OrderService = Depends(get_service),
+):
+    return

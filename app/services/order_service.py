@@ -152,11 +152,15 @@ class OrderService(BaseService[OrderModel, OrderCreate, OrderRead, OrderUpdate])
             )
             order = self.__add_to_db(order, self.db)
 
+            print(f"<ORDER SERVICE> : ORDER MODEL\n-------> {order.status} ")
+
             if order:
                 for item, file in zip(order_data.items, files):
                     # Create order item
                     order_item = self.__order_item_create(order.id, item, file, self.db)
-
+                    print(
+                        f"<ORDER SERVICE> : ORDER ITEM\n--------> {order_item.status}"
+                    )
                     order_price += order_item.item_price
                     # Process and save file
                     file_name, file_path = self.__process_file(file)
@@ -186,7 +190,9 @@ class OrderService(BaseService[OrderModel, OrderCreate, OrderRead, OrderUpdate])
 
                 self.db.commit()
                 self.db.refresh(order)
-
+                print(
+                    f"<ORDER SERVICE> : FINAL ORDER ON COMMIT\n-------> {order.status}"
+                )
                 return OrderRead.from_orm(order)
 
         except Exception as e:

@@ -5,12 +5,13 @@ from sqlalchemy import Select
 class OrderFilters(BaseFilters):
     def __init__(
         self,
+        all: bool = False,
         user_id: str | None = None,
         status: str | None = None,
         company_id: str | None = None,
     ):
         self.company_id = company_id
-        super().__init__(user_id, status)
+        super().__init__(all, user_id, status)
 
     def apply(self, stmt: Select, model):
         stmt = super().apply(stmt, model)

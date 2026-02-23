@@ -84,6 +84,11 @@ def delete_company(
     return "deleted"
 
 
+@company_endpoints.get("/all")
+def list_companies_min(service: CompanyService = Depends(get_service)):
+    return
+
+
 @company_endpoints.get("/{company_id}/stats/")
 def get_company_stats(
     company_id: str,

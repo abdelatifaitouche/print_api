@@ -50,6 +50,28 @@ class BaseRepository(Generic[T]):
                 details={"error": str(e)},
             )
 
+    def __apply_pagination(self, stmt: Select, pagination: Pagination | None = None):
+        page_size: int = 10
+        count_stmt = select(func.count()).select_from(stmt.subquery())
+
+        total_items = self.db.scalar(count_stmt)
+
+        total_pages: int = math.ceil(total_items / page_size)
+
+        if not pagination:
+            pagination: Pagination = Pagination(
+                page=1, total_items=total_items, total_pages=total_pages
+            )
+        else:
+            if pagination.page <= 0 or pagination.page > total_pages:
+                return []
+            pagination.total_items = total_items
+            pagination.total_pages = total_pages
+
+        stmt = stmt.limit(page_size).offset((pagination.page - 1) * page_size)
+
+        return stmt, pagination
+
     def list(
         self,
         filters: BaseFilters | None = None,
@@ -57,35 +79,16 @@ class BaseRepository(Generic[T]):
         pagination: Pagination | None = None,
     ) -> list[T]:
         try:
-            page_size: int = 10
-
             if stmt is None:
                 stmt: Select = select(self.MODEL)
 
             if filters:
                 stmt = filters.apply(stmt, self.MODEL)
 
-            count_stmt = select(func.count()).select_from(stmt.subquery())
+            stmt = stmt.order_by(self.MODEL.created_at.desc())
 
-            total_items = self.db.scalar(count_stmt)
-
-            total_pages: int = math.ceil(total_items / page_size)
-
-            if not pagination:
-                pagination: Pagination = Pagination(
-                    page=1, total_items=total_items, total_pages=total_pages
-                )
-            else:
-                if pagination.page <= 0 or pagination.page > total_pages:
-                    return []
-                pagination.total_items = total_items
-                pagination.total_pages = total_pages
-
-            stmt = (
-                stmt.order_by(self.MODEL.created_at.desc())
-                .limit(page_size)
-                .offset((pagination.page - 1) * page_size)
-            )
+            if not filters.all:
+                stmt, pagination = self.__apply_pagination(stmt, pagination)
 
             result: list[T] = self.db.execute(stmt).scalars().all()
 

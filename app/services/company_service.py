@@ -27,3 +27,6 @@ class CompanyService(
         )
 
         return CompanyRead.from_orm(created_model)
+
+    def list_all_min(self):
+        return

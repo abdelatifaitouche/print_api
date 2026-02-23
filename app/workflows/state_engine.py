@@ -3,7 +3,7 @@ from app.enums.order_enums import OrderStatus
 from app.enums.order_items_status import OrderItemStatus
 from app.models.order import OrderModel as OrderModelDb
 from app.models.order_item import OrderItem as OrderItemDb
-
+from app.execeptions.base import ValidationError
 
 VALID_TRANSITIONS: dict[OrderItemStatus, OrderItemStatus] = {
     OrderItemStatus.PENDING: OrderItemStatus.WAIT_FOR_PROCESSING,
@@ -34,45 +34,47 @@ VALID_ORDER_TRANSITIONS: dict[OrderStatus, OrderStatus] = {
 def derive_order_state(all_states: list[OrderItemStatus]) -> OrderStatus | None:
     unique = set(all_states)
 
-    if {OrderItemStatus.FINISHED.value} == unique:
+    if unique == {OrderItemStatus.FINISHED}:
         return OrderStatus.FINISHED
 
-    if OrderItemStatus.PROCESSING.value in unique:
-        return OrderStatus.PROCESSING
+    if unique == {OrderItemStatus.PAIED}:
+        return OrderStatus.PAIED
 
-    if {OrderItemStatus.PRINTED.value} == unique:
-        return OrderStatus.PROCESSED
-
-    if OrderItemStatus.PAIED.value in unique:
+    if OrderItemStatus.PAIED in unique:
         return OrderStatus.PARTIAL_PAIED
 
-    if {OrderItemStatus.PAIED.value} == unique:
-        return OrderStatus.PAIED
+    if unique == {OrderItemStatus.DELIVERED}:
+        return OrderStatus.DELIVERED
+
+    if OrderItemStatus.DELIVERED in unique:
+        return OrderStatus.PARTIAL_DELIVERED
+
+    if unique == {OrderItemStatus.PRINTED}:
+        return OrderStatus.PROCESSED
+
+    if OrderItemStatus.PROCESSING in unique:
+        return OrderStatus.PROCESSING
     return None
 
 
-def transition(item: OrderItemDb, all_items: list):
-    print("----------TRANSITION FUNCTION STARTED------------------------")
+def get_valid_transition(item: OrderItemDb) -> OrderItemStatus:
     if item.status not in VALID_TRANSITIONS.keys():
-        raise ValueError("Invalid transition")
+        raise ValidationError(message="Invalid Transition State")
 
     if item.status in TERMINAL_STATES:
-        raise ValueError("Cant transition in TERMINAL STATE")
+        raise ValidationError(message="Terminal State Reached")
 
-    next_state = VALID_TRANSITIONS[item.status]
+    return VALID_TRANSITIONS[item.status]
 
-    print(f"NEXT ITEM STATE : {next_state}")
-    all_states = []
-    for i in all_items:
-        if str(i.id) == str(item.id):
-            print(f"appending the next state {i.id} == {item.id}")
-            all_states.append(next_state)
-        else:
-            all_states.append(i.status)
-    print(f"ALL ITEMS STATES : {all_states}")
+
+def transition(item: OrderItemDb, all_items: list):
+    next_state: OrderItemStatus = get_valid_transition(item)
+
+    all_states = [next_state if i.id == item.id else i.status for i in all_items]
+
+    print("all states : ")
+    print(all_states)
 
     order_status = derive_order_state(all_states)
 
-    print(f"NEXT ITEM STATE : {next_state} , NEXT_ORDER_STATE : {order_status}")
-    print("-------------------------------------------------------------------")
     return next_state, order_status

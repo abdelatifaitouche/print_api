@@ -1,5 +1,5 @@
 from .base import Base
-from sqlalchemy import String, Integer, ForeignKey, Sequence, text, Float
+from sqlalchemy import Enum, String, Integer, ForeignKey, Sequence, text, Float
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.enums.order_enums import OrderStatus
 
@@ -12,8 +12,9 @@ class OrderModel(Base):
             "concat('ORD#', lpad(nextval('order_number_seq')::text, 5, '0'))"
         ),
     )
-    status: Mapped[str] = mapped_column(
-        String, server_default=OrderStatus.PENDING.value
+    status: Mapped[OrderStatus] = mapped_column(
+        Enum(OrderStatus, name="order_status_enum", native_enum=False),
+        server_default=text(f"'{OrderStatus.PENDING}'"),
     )
     order_price: Mapped[Float] = mapped_column(Float, nullable=True)
     created_by: Mapped[str] = mapped_column(

@@ -11,7 +11,7 @@ class OrderRead(BaseModel):
     id: UUID
     order_number: str
     order_price: float | None = None
-    status: str
+    status: OrderStatus = OrderStatus.PENDING
     created_at: datetime
     updated_at: datetime
     created_by: UUID
@@ -27,5 +27,6 @@ class OrderUpdate(BaseModel):
 
 
 class OrderCreate(BaseModel):
+    status: OrderStatus = OrderStatus.PENDING
     items: List[OrderItemCreate]
     model_config = {"from_attributes": True}

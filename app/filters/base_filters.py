@@ -3,7 +3,10 @@ from sqlalchemy import Select
 
 
 class BaseFilters(IFilters):
-    def __init__(self, user_id: str | None = None, status: str | None = None):
+    def __init__(
+        self, all: bool = False, user_id: str | None = None, status: str | None = None
+    ):
+        self.all: bool = all
         self.status: str | None = status
         self.user_id: str | None = user_id
 

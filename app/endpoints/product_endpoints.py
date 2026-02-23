@@ -28,7 +28,7 @@ def create_product(
     return product_service.create(data)
 
 
-@product_endpoints.get("/")
+@product_endpoints.get("")
 def list_products(
     filters: BaseFilters | None = Depends(BaseFilters),
     pagination: Pagination | None = Depends(Pagination),

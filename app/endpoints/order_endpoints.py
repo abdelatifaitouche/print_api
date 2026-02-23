@@ -77,10 +77,11 @@ def create_order(
         require_permission(Permissions.CAN_CREATE_ALL, Permissions.CAN_CREATE_ORDER)
     ),
 ) -> OrderRead:
-    print(ctx.user.company_id)
     try:
         raw_data = json.loads(items_data)
+        print(f"RAW DATA FROM ENDPOINT : {raw_data}")
         order_data = OrderCreate(items=raw_data)
+        print(f"PARSED DATA WITH ORDER CREATE : {order_data}")
     except (json.JSONDecodeError, ValueError) as e:
         raise HTTPException(422, f"invalid format for the order items")
 

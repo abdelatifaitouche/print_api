@@ -14,6 +14,7 @@ class OrderItemBase(BaseModel):
 
 
 class OrderItemCreate(BaseModel):
+    status: OrderItemStatus = OrderItemStatus.PENDING
     product_id: str
     quantity: int
 

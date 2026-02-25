@@ -22,6 +22,7 @@ class CompanyModel(Base):
     )
 
     company_orders: Mapped[list["OrderModel"]] = relationship(back_populates="company")
+    documents: Mapped[list["DocumentModel"]] = relationship(back_populates="company")
 
     def __repr__(self):
         return f"<Company : {self.name}>"

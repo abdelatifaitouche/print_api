@@ -78,3 +78,4 @@ def transition(item: OrderItemDb, all_items: list):
     order_status = derive_order_state(all_states)
 
     return next_state, order_status
+

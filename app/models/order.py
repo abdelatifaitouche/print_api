@@ -36,3 +36,5 @@ class OrderModel(Base):
     items: Mapped[list["OrderItem"]] = relationship(
         back_populates="order", cascade="all, delete-orphan"
     )
+
+    documents: Mapped[list["DocumentModel"]] = relationship(back_populates="order")

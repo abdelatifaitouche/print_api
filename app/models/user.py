@@ -19,3 +19,14 @@ class User(Base):
         String, ForeignKey("companies.id"), nullable=True
     )
     company: Mapped["CompanyModel"] = relationship(back_populates="users")
+
+    created_documents: Mapped[list["DocumentModel"]] = relationship(
+        back_populates="creator", foreign_keys="DocumentModel.created_by"
+    )
+    approved_documents: Mapped[list["DocumentModel"]] = relationship(
+        back_populates="approver", foreign_keys="DocumentModel.approved_by"
+    )
+
+    created_payments: Mapped[list["PaymentModel"]] = relationship(
+        back_populates="creator", foreign_keys="PaymentModel.created_by"
+    )

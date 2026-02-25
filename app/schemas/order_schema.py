@@ -30,3 +30,12 @@ class OrderCreate(BaseModel):
     status: OrderStatus = OrderStatus.PENDING
     items: List[OrderItemCreate]
     model_config = {"from_attributes": True}
+
+
+class OrderSummary(BaseModel):
+    id: str
+    order_number: str
+    status: str
+
+    class config:
+        from_attributes = True

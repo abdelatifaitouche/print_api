@@ -11,6 +11,15 @@ class CompanyBase(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class UserSummary(BaseModel):
+    id: str
+    username: str
+    email: str
+
+    class config:
+        from_attrubutes = True
+
+
 class UserCreate(BaseModel):
     username: str
     email: str

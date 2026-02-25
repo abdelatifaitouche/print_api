@@ -7,6 +7,16 @@ from typing import List
 from app.schemas.user_schema import User
 
 
+class CompanySummary(BaseModel):
+    id: str
+    name: str
+    email: str
+    phone: str
+
+    class config:
+        from_attributes = True
+
+
 class CompanyBase(BaseModel):
     id: UUID
     name: str

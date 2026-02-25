@@ -16,8 +16,7 @@ class UserSummary(BaseModel):
     username: str
     email: str
 
-    class config:
-        from_attrubutes = True
+    model_config = {"from_attributes": True}
 
 
 class UserCreate(BaseModel):

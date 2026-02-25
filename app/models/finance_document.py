@@ -66,3 +66,7 @@ class DocumentModel(Base):
     )
 
     approved_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+    payments: Mapped[list["PaymentModel"]] = relationship(
+        back_populates="document", cascade="all, delete-orphan"
+    )

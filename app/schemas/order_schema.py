@@ -37,5 +37,4 @@ class OrderSummary(BaseModel):
     order_number: str
     status: str
 
-    class config:
-        from_attributes = True
+    model_config = {"from_attributes": True}

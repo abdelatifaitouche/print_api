@@ -13,8 +13,7 @@ class CompanySummary(BaseModel):
     email: str
     phone: str
 
-    class config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 
 
 class CompanyBase(BaseModel):

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, validator
+from pydantic import BaseModel
 from app.enums.document_type import DocumentStatus, DocumentType
 from typing import Optional
 from datetime import datetime
@@ -10,22 +10,8 @@ from app.schemas.order_schema import OrderSummary
 
 class DocumentCreate(BaseModel):
     document_type: DocumentType = DocumentType.DEVIS
-    total_ht: float
-    total: float
     order_id: str
     company_id: str
-
-    @validator("total")
-    def total_must_be_positive(cls, v):
-        if v <= 0:
-            raise ValueError("Total must be positive")
-        return v
-
-    @validator("total_ht")
-    def total_ht_must_be_positive(cls, v):
-        if v <= 0:
-            raise ValueError("Total HT must be positive")
-        return v
 
 
 class DocumentUpdate(BaseModel):
@@ -77,6 +63,7 @@ class DocumentSummary(BaseModel):
     document_type: DocumentType
     status: DocumentStatus
     total: float
+    total_ht: float
     total_paid: float
     total_remaining: float
     company_id: str

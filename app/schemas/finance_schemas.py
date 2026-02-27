@@ -18,6 +18,8 @@ class DocumentUpdate(BaseModel):
     total_ht: Optional[float] = None
     total: Optional[float] = None
     status: Optional[DocumentStatus] = None
+    total_paid: float | None = None
+    total_remaining: float | None = None
     # total_paid and total_remaining intentionally excluded
     # document_type, order_id, company_id intentionally excluded
 

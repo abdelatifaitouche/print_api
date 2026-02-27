@@ -74,3 +74,9 @@ class DocumentService(
         )
 
         return DocumentSummary.from_orm(self.repo.create(facture))
+
+    def update(self, entity_id: str, data: DocumentUpdate):
+        if data.total == data.total_paid or data.total_remaining == 0:
+            data.status = DocumentStatus.PAID
+
+        return super().update(entity_id, data)

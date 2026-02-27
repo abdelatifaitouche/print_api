@@ -10,7 +10,9 @@ class DocumentFilters(BaseFilters):
         status: str | None = None,
         company_id: str | None = None,
         document_type: str | None = None,
+        order_id: str | None = None,
     ):
+        self.order_id = order_id
         self.company_id = company_id
         self.document_type = document_type
 
@@ -24,5 +26,8 @@ class DocumentFilters(BaseFilters):
 
         if self.document_type:
             stmt = stmt.where(model.document_type == self.document_type)
+
+        if self.order_id:
+            stmt = stmt.where(model.order_id == self.order_id)
 
         return stmt

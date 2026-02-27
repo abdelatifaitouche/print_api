@@ -35,6 +35,16 @@ def get_document_by_id(
     return service.get_by_id(document_id)
 
 
+@finance_endpoints.get("/{order_id}/documents")
+def list_order_documents(
+    order_id: str,
+    filters: DocumentFilters | None = Depends(DocumentFilters),
+    service: DocumentService = Depends(get_service),
+    pagination: Pagination | None = Depends(Pagination),
+):
+    return service.get_order_documents(order_id, filters, pagination)
+
+
 @finance_endpoints.post("/create/", response_model=DocumentSummary)
 def create_document(
     data: DocumentCreate,

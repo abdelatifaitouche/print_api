@@ -12,6 +12,8 @@ from app.repositories.order_repo import OrderRepository
 from app.auth.permission_context import PermissionContext
 from app.enums.document_type import DocumentType, DocumentStatus
 from datetime import datetime
+from app.filters.document_filters import DocumentFilters
+from app.schemas.pagination import Pagination
 
 
 class DocumentService(
@@ -74,6 +76,22 @@ class DocumentService(
         )
 
         return DocumentSummary.from_orm(self.repo.create(facture))
+
+    def get_order_documents(
+        self,
+        order_id: str,
+        filters: DocumentFilters = None,
+        pagination: Pagination = None,
+    ) -> list[DocumentRead]:
+        order_repo: OrderRepository = OrderRepository(self.db)
+
+        order: OrderModel = order_repo.get_by_id(order_id)
+
+        filters.order_id = order.id
+
+        docs: list[DocumentRead] = super().list(filters, pagination)
+
+        return docs
 
     def update(self, entity_id: str, data: DocumentUpdate):
         if data.total == data.total_paid or data.total_remaining == 0:

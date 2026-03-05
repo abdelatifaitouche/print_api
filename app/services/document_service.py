@@ -54,6 +54,9 @@ class DocumentService(
     def approve_devis(self, entity_id: str, ctx: PermissionContext):
         document: DocumentRead = super().get_by_id(entity_id)
 
+        if document.order.status != "ACCEPTED":
+            raise ValueError("Order not Accepted")
+
         if document.document_type != DocumentType.DEVIS:
             raise ValueError("Cant approve facture")
 

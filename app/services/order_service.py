@@ -109,6 +109,7 @@ class OrderService(BaseService[OrderModel, OrderCreate, OrderRead, OrderUpdate])
             product_id=order_item.product_id,
             quantity=order_item.quantity,
             item_price=item_price,
+            format=order_item.format,
         )
 
         return self.__add_to_db(order_item_db, db)

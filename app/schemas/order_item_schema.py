@@ -4,6 +4,7 @@ from app.enums.order_items_status import OrderItemStatus
 from .product_schema import ProductLightRead
 from typing import Optional
 from .uploadedfile_schema import UploadedFileRead
+from app.enums.format import ProductFormat
 
 
 class OrderItemBase(BaseModel):
@@ -17,7 +18,7 @@ class OrderItemCreate(BaseModel):
     status: OrderItemStatus = OrderItemStatus.PENDING
     product_id: str
     quantity: int
-
+    format: ProductFormat = ProductFormat.SM72
     model_config = {"from_attributes": True}
 
 
@@ -27,6 +28,7 @@ class OrderItemRead(BaseModel):
     item_number: str
     item_price: float
     product: ProductLightRead
+    format: ProductFormat | None = None
     status: OrderItemStatus | None = None
     quantity: int
     file: UploadedFileRead = None
@@ -37,3 +39,4 @@ class OrderItemUpdate(BaseModel):
     item_price: float | None = None
     status: OrderItemStatus | None = None
     quantity: int | None = None
+    format: ProductFormat | None = None

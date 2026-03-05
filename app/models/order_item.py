@@ -3,6 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from uuid import UUID
 from sqlalchemy import ForeignKey, Sequence, String, Float, text, Integer, Enum
 from app.enums.order_items_status import OrderItemStatus
+from app.enums.format import ProductFormat
 
 
 class OrderItem(Base):
@@ -21,6 +22,12 @@ class OrderItem(Base):
         Enum(OrderItemStatus, name="order_item_status_enum", native_enum=False),
         server_default=text(f"'{OrderItemStatus.PENDING}'"),
     )
+
+    format: Mapped[ProductFormat] = mapped_column(
+        Enum(ProductFormat, name="product_format", native_enum=False),
+        server_default=text(f"'{ProductFormat.SM72}'"),
+    )
+
     # add : dims, product_relationship , files_id , price ,
     item_price: Mapped[Float] = mapped_column(Float, default=0.0, nullable=True)
     product: Mapped["ProductModel"] = relationship(back_populates="order_items")

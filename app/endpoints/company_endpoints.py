@@ -94,4 +94,5 @@ def get_company_stats(
     company_id: str,
     service: CompanyService = Depends(get_service),
 ):
-    return
+    stats: dict = service.get_stats(company_id)
+    return stats

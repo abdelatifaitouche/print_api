@@ -39,13 +39,15 @@ class DocumentService(
 
         tva: float = 0.19
 
+        total: float = order.order_price * tva + order.order_price
+
         document: DocumentModel = DocumentModel(
             order_id=data.order_id,
             company_id=data.company_id,
-            total=order.order_price * tva + order.order_price,
+            total=total,
             total_ht=order.order_price,
             total_paid=0.0,
-            total_remaining=order.order_price,
+            total_remaining=total,
             created_by=str(ctx.user.user_id),
         )
 
@@ -53,9 +55,6 @@ class DocumentService(
 
     def approve_devis(self, entity_id: str, ctx: PermissionContext):
         document: DocumentRead = super().get_by_id(entity_id)
-
-        if document.order.status != "ACCEPTED":
-            raise ValueError("Order not Accepted")
 
         if document.document_type != DocumentType.DEVIS:
             raise ValueError("Cant approve facture")

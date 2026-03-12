@@ -63,6 +63,10 @@ class PaymentService(
 
             if facture.total_remaining <= 0:
                 facture.status = DocumentStatus.PAID
+                from app.services.order_service import OrderService
+
+                order_service: OrderService = OrderService(self.db)
+                order_service.pay_order(facture.order_id)
             elif total_paid > 0:
                 facture.status = DocumentStatus.PARTIAL_PAID
 

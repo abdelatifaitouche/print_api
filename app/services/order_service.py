@@ -33,6 +33,18 @@ class OrderService(BaseService[OrderModel, OrderCreate, OrderRead, OrderUpdate])
         self.UPLOAD_DIR = Path("/app/uploads")
         self.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
+    def pay_order(self, order_id: str):
+        order_model: OrderModel = self.repo.get_by_id(order_id)
+
+        if order_model.status == OrderStatus.PAIED:
+            raise ValidationError(
+                message=f"Order<{order_model.order_number}> Already Paid"
+            )
+
+        updated_order = self.repo.update(order_model, {"status": OrderStatus.PAIED})
+
+        return updated_order
+
     def accept_order(self, order_id: str) -> OrderRead:
         from app.services.order_item_service import OrderItemService
         from app.schemas.order_item_schema import OrderItemUpdate

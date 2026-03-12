@@ -52,10 +52,6 @@ class OrderItemService(
         order: OrderRead = order_service.get_by_id(item.order_id)
         next_item_state, next_order_state = transition(item, order.items)
 
-        if next_order_state is not None:
-            print(f"Updating the order states to  : {next_order_state}")
-            order_service.update(item.order_id, OrderUpdate(status=next_order_state))
-
         print(f"transitioning the item state to {next_item_state}")
 
         transitioned_item: OrderItemRead = super().update(

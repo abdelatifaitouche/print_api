@@ -12,6 +12,7 @@ from app.endpoints.product_endpoints import product_endpoints
 from app.endpoints.finance_endpoints import finance_endpoints
 from app.execeptions.exceptions_handlers import register_exception_handlers
 from app.endpoints.payment_enpoints import payment_endpoints
+from app.endpoints.dashboard_endpoints import dashboard
 
 version = "v1"
 
@@ -28,6 +29,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(dashboard, prefix=f"/api/{version}/dashboard")
 app.include_router(payment_endpoints, prefix=f"/api/{version}/payments")
 app.include_router(finance_endpoints, prefix=f"/api/{version}/documents")
 app.include_router(order_endpoint, prefix=f"/api/{version}/orders")

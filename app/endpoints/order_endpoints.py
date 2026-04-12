@@ -62,7 +62,7 @@ def get_order_by_id(
 
     if not ctx.can_access_resource(order.created_by):
         raise HTTPException(
-            detail="Can't access resource", status_code=status.HTTP_401_UNAUTHORIZED
+            detail="Can't access resource", status_code=status.HTTP_403_FORBIDDEN
         )
 
     return order
@@ -79,9 +79,7 @@ def create_order(
 ) -> OrderRead:
     try:
         raw_data = json.loads(items_data)
-        print(f"RAW DATA FROM ENDPOINT : {raw_data}")
         order_data = OrderCreate(items=raw_data)
-        print(f"PARSED DATA WITH ORDER CREATE : {order_data}")
     except (json.JSONDecodeError, ValueError) as e:
         raise HTTPException(422, f"invalid format for the order items")
 
@@ -113,7 +111,11 @@ def accept_order(
 
 
 @order_endpoint.patch("/{order_id}/reject/", response_model=OrderRead)
-def reject_order(order_id: str, service: OrderService = Depends(get_service)):
+def reject_order(
+    order_id: str,
+    service: OrderService = Depends(get_service),
+    ctx: PermissionContext = Depends(require_permission(Permissions.CAN_UPDATE_ALL)),
+):
     return service.reject_order(order_id)
 
 

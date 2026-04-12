@@ -1,10 +1,13 @@
 import jwt
+import logging
 from datetime import datetime, timedelta, timezone
 import os
 from dotenv import load_dotenv
 from app.schemas.jwt_payload import JwtPayload
 
 load_dotenv()
+
+logger = logging.getLogger(__name__)
 
 
 class JwtService:
@@ -16,6 +19,9 @@ class JwtService:
     """
 
     SECRET_KEY: str = os.getenv("SECRET_KEY")
+
+    if not SECRET_KEY:
+        raise ValueError("SECRET_KEY environment variable is not set")
     ACCESS_TOKEN_EXPIRE: int = 2  # access token expire time in hours
     REFRESH_TOKEN_EXPIRE: int = 7  # refresh token expire time in days!
 
@@ -57,18 +63,12 @@ class JwtService:
             )
 
             return payload
-        except jwt.ExpiredSignatureError as e:
-            print(e)
+        except jwt.ExpiredSignatureError:
+            logger.warning("Expired JWT token")
             raise
-        except jwt.InvalidSignatureError as e:
-            print(e)
+        except jwt.InvalidSignatureError:
+            logger.warning("Invalid JWT signature")
             raise
-        except jwt.DecodeError as e:
-            print(e)
+        except jwt.DecodeError:
+            logger.warning("Failed to decode JWT token")
             raise
-
-    def verify_token():
-        return
-
-    def get_current_user():
-        return

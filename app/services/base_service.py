@@ -3,7 +3,7 @@ from app.repositories.base import BaseRepository
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from abc import ABC
-from app.execeptions.base import NotFoundError
+from app.exceptions.base import NotFoundError
 from app.auth.permission_context import PermissionContext
 from app.schemas.filters import Filters
 from app.schemas.pagination import Pagination

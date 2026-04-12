@@ -4,7 +4,7 @@ from fastapi.exceptions import RequestValidationError
 from sqlalchemy.exc import SQLAlchemyError
 import logging
 
-from app.execeptions.base import (
+from app.exceptions.base import (
     AppExceptions,
     NotFoundError,
     ValidationError,
@@ -240,10 +240,6 @@ def register_exception_handlers(app: FastAPI):
             content={
                 "error": "internal_server_error",
                 "message": "An unexpected error occurred. Please try again later.",
-                "details": {
-                    "error_type": type(exc).__name__,
-                    "error": str(exc),
-                },
             },
         )
 

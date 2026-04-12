@@ -17,7 +17,7 @@ from app.services.base_service import BaseService
 from app.services.order_item_service import OrderItemService
 from app.utils.tasks import process_file_upload
 from app.schemas.user_schema import User
-from app.execeptions.base import NotFoundError, ValidationError
+from app.exceptions.base import NotFoundError, ValidationError
 from app.enums.order_enums import OrderStatus
 
 

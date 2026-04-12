@@ -12,7 +12,9 @@ load_dotenv()
 
 class JwtManager:
     def __init__(self):
-        self.__secret_key = os.getenv("SECRET_KEY")  # needs to be loaded from env
+        self.__secret_key = os.getenv("SECRET_KEY")
+        if not self.__secret_key:
+            raise ValueError("SECRET_KEY environment variable is not set")
         self.algo = "sha256"
         self.__access_exp = 36000  # needs to be loaded from env
         self.__refresh_exp = 5000000  # needs to be loaded from env
@@ -113,10 +115,9 @@ class JwtManager:
 
         decoded_payload = self.__base_64_decoding(payload)
 
-        current_time = int(datetime.utcnow().timestamp())
+        current_time = int(datetime.now(tz=None).timestamp())
 
         if decoded_payload["exp"] < current_time:
-            print("expired token")
             return False
 
         return True

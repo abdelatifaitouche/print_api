@@ -7,7 +7,7 @@ from app.utils.jwt_utils import JwtManager
 from app.services.base_service import BaseService
 from app.auth.jwt.jwt_service import JwtService
 from app.schemas.jwt_payload import JwtPayload
-from app.execeptions.base import (
+from app.exceptions.base import (
     InvalidCredentialsError,
     WeakPasswordError,
     UserAlreadyExistsError,
@@ -33,10 +33,10 @@ class AuthService(BaseService[UserDB, UserCreate, User, UserAdminUpdate]):
                 details={"email": user_data.email},
             )
 
-        if len(user_data.password) < 6:
+        if len(user_data.password) < 12:
             raise WeakPasswordError(
-                message="Password length must be at least 6 characters",
-                details={"min_length": 6},
+                message="Password length must be at least 12 characters",
+                details={"min_length": 12},
             )
 
         hashed_password = encrypt_password(user_data.password)
@@ -72,9 +72,6 @@ class AuthService(BaseService[UserDB, UserCreate, User, UserAdminUpdate]):
         access_token: str = JwtService.generate_access_token(payload)
 
         return access_token
-
-    def get_user_by_email(self):
-        return
 
     def get_user_by_id(self, user_id: str) -> User:
         user: User = self.repo.get_by_id(user_id)

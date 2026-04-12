@@ -11,7 +11,7 @@ from app.repositories.document_repo import DocumentRepository
 from app.schemas.finance_schemas import DocumentRead, DocumentUpdate
 from app.enums.document_type import DocumentType, DocumentStatus
 from app.auth.permission_context import PermissionContext
-from app.execeptions.exceptions_handlers import ValidationError, NotFoundError
+from app.exceptions.base import ValidationError, NotFoundError
 
 
 class PaymentService(

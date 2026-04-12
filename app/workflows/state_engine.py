@@ -3,7 +3,7 @@ from app.enums.order_enums import OrderStatus
 from app.enums.order_items_status import OrderItemStatus
 from app.models.order import OrderModel as OrderModelDb
 from app.models.order_item import OrderItem as OrderItemDb
-from app.execeptions.base import ValidationError
+from app.exceptions.base import ValidationError
 
 VALID_TRANSITIONS: dict[OrderItemStatus, OrderItemStatus] = {
     OrderItemStatus.PENDING: OrderItemStatus.WAIT_FOR_PROCESSING,

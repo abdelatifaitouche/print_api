@@ -1,3 +1,4 @@
+import os
 from fastapi import APIRouter, Depends, Response, status
 from fastapi.exceptions import HTTPException
 from app.schemas.user_schema import (
@@ -20,6 +21,8 @@ from app.enums.permissions import Permissions
 from app.schemas.jwt_payload import JwtPayload
 
 auth_endpoints = APIRouter()
+
+SECURE_COOKIES = os.getenv("ENVIRONMENT", "production") != "development"
 
 
 def get_service(db: Session = Depends(get_db)):
@@ -54,7 +57,7 @@ def login_user(
         key="access_token",
         value=access_token,
         httponly=True,
-        secure=False,
+        secure=SECURE_COOKIES,
         samesite="lax",
         max_age=36000,
         path="/",
@@ -65,7 +68,7 @@ def login_user(
 @auth_endpoints.post("/logout/")
 def logout_user(response: Response):
     response.set_cookie(
-        key="access_token", value="", httponly=True, secure=False, samesite="lax"
+        key="access_token", value="", httponly=True, secure=SECURE_COOKIES, samesite="lax"
     )
     return "loggedout"
 

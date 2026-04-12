@@ -2,7 +2,7 @@ from typing import Type, TypeVar, Generic
 from sqlalchemy.orm import Session
 from sqlalchemy import select, func, Select
 from app.models.base import Base
-from app.execeptions.base import DatabaseError, ValidationError, AlreadyExistsError
+from app.exceptions.base import DatabaseError, ValidationError, AlreadyExistsError
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from app.schemas.pagination import Pagination
 import math
